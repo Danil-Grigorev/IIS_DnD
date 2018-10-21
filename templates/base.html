@@ -2,8 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block title %}Authentication{% endblock %}</title>
+
+
+    <!-- Bootstrap css -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- My css -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'DnD_db/styles.css' %}">
+
+    {% if title %}
+        <title>DnD IS - {{ title }}</title>
+    {% else %}
+        <title>DnD IS</title>
+    {% endif %}
 </head>
 <body>
     <main>

@@ -1,0 +1,20 @@
+.form-group.required label:before {
+    color: red;
+    content: "*";
+    position: absolute;
+    margin-left: -15px;
+}
+
+.form {
+    width: 40%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form input {
+    margin-left: 20px;
+}
+
+.centered-form label {
+    margin: 10px;
+}

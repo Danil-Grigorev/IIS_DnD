@@ -4,16 +4,29 @@
 {% block title %}Login page{% endblock %}
 
 {% block content %}
-    <h2>Login</h2>
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <p>Username: {{ form.username }}</p>
-        <div class="form-group">
-            <label for="usr">Username: </label>
-            <input type="text" class="form-control" id="usr">
-        </div>
-        <label>Password: {{ form.password }}</label>
-        <input type="submit" value="login">
-        <input type="hidden" name="next" value="{{  next }}">
-    </form>
+    <div class="container">
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form">
+                <h2>Login</h2>
+                <div class="jumbotron">
+                    {% for error in form.non_field_errors %}
+                        <div class="form-group small text-danger has-errors">{{ error }}</div>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <div class="form-group has-errors text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                        <div class="form-group">
+                            {{ field.label_tag }}{{ field }}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group small">
+                        <input class="btn btn-primary" type="submit" value="Log in">
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+    </div>
 {% endblock %}
