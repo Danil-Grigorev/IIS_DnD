@@ -1,14 +1,13 @@
-<!-- templates/registration/login.html -->
-{% extends 'base.html' %}
+{% extends 'base_nav.html' %}
 
-{% block title %}Login page{% endblock %}
+{% block title %}{{ name }}{% endblock %}
 
 {% block content %}
     <div class="container">
-        <form method="post" action="{% url 'login' %}">
+        <form method="post">
             {% csrf_token %}
-            <div class="form small-center">
-                <h2>Login</h2>
+            <div class="form">
+                <h2>{{ name }}</h2>
                 <div class="jumbotron">
                     {% for error in form.non_field_errors %}
                         <div class="form-group small text-danger has-errors">{{ error }}</div>
@@ -22,8 +21,10 @@
                         </div>
                     {% endfor %}
                     <div class="form-group small">
-                        <input class="btn btn-primary" type="submit" value="Log in">
+                        <input class="btn btn-primary" type="submit" value="{{ submit_name }}">
+                        <input class="btn btn-danger pull-right" type="reset" onclick="return_back()" value="Cancel">
                     </div>
+
                 </div>
             </div>
             <input type="hidden" name="next" value="{{ next }}">

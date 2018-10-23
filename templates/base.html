@@ -18,9 +18,17 @@
     {% else %}
         <title>DnD IS</title>
     {% endif %}
+
+    <script>
+        function return_back() {
+            history.back();
+        }
+    </script>
 </head>
 <body>
     <main>
+        {% block navigation %}
+        {% endblock %}
         {% block content %}
         {% endblock %}
     </main>
