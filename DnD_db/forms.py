@@ -6,10 +6,12 @@ from .models import *
 class CreateSession(forms.ModelForm):
     class Meta:
         model = Session
-        widgets = {'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter location"})}
-        fields = ['location']
+        widgets = {
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter location"}),
+            'campaign': forms.Select(attrs={'class': 'form-control', 'placeholder': "Enter location"})
+        }
+        fields = ['location', 'campaign']
 
-    #
     # name = models.CharField(max_length=100)
     # race = models.CharField(max_length=2, choices=RACES, default=HM)
     # speciality = models.CharField(max_length=2, choices=SPECS, default=WA)
@@ -24,6 +26,11 @@ class CreateCharacter(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Character name'}),
             'race': forms.Select(attrs={'class': 'form-control'}),
             'speciality': forms.Select(attrs={'class': 'form-control'}),
-            'owner': forms.Select(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'race', 'speciality', 'owner']
+        fields = ['name', 'race', 'speciality']
+
+
+class CreatePlayer(forms.ModelForm):
+    class Meta:
+        model = Player
+        fields = ['nickname']
