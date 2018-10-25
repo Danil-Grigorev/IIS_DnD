@@ -33,4 +33,26 @@ class CreateCharacter(forms.ModelForm):
 class CreatePlayer(forms.ModelForm):
     class Meta:
         model = Player
+        widgets = {
+            'nickname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Pick a nickname'})
+        }
         fields = ['nickname']
+
+
+class CreateMap(forms.ModelForm):
+    class Meta:
+        model = Map
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map description'}),
+            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
+        }
+        fields = ['name', 'description', 'author']
+
+    # def save(self, user=None, commit=True):
+    #     s = Map()
+    #     if user:
+    #         s.author.add(user)
+    #     if commit:
+    #         s.save()
+    #     return s

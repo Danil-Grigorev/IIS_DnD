@@ -1,10 +1,12 @@
+from django.contrib.auth.models import AnonymousUser
+
 from .models import *
+
+
 # Create your tests here.
 
 def has_free_player(user):
-    try:
-        p_list = Player.objects.get(user=user)
-    except Player.DoesNotExist:
+    if isinstance(user, AnonymousUser):
         return False
-    else:
-        return not p_list.session_part.exists()
+    p_list = Player.objects.filter(user=user)
+    return any([not p.session_part.exists() for p in p_list])

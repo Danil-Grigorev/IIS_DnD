@@ -4,8 +4,8 @@ from django.utils.timezone import now
 
 
 class Player(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    nickname = models.CharField(max_length=100, blank=False, default='new player')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    nickname = models.CharField(max_length=100, blank=False, default='new player', unique=True)
     session_part = models.ManyToManyField('Session', blank=True)
 
     def __str__(self):
@@ -13,10 +13,10 @@ class Player(models.Model):
 
 
 class Session(models.Model):
-    location = models.CharField(max_length=100, blank=False)
+    location = models.CharField(max_length=100, blank=False, default='Location for session')
     creation_date = models.DateTimeField(default=now)
-    creator = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False)
-    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, blank=False)
+    creator = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
+    campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
 
     def __str__(self):
         return "{}: {}".format(self.pk, self.location)
@@ -73,11 +73,11 @@ class Character(models.Model):
         (SI, 'Sicco'),
     )
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True, default='New character')
     race = models.CharField(max_length=2, choices=RACES, default=HM)
     speciality = models.CharField(max_length=2, choices=SPECS, default=WA)
     level = models.IntegerField(default=1)
-    owner = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False)
+    owner = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
     death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
@@ -85,24 +85,25 @@ class Character(models.Model):
 
 
 class Map(models.Model):
-    name = models.CharField(max_length=100)
-    author = models.ManyToManyField(Player)
+    name = models.CharField(max_length=100, default='New map', unique=True)
+    author = models.ManyToManyField(Player, blank=False)
+    description = models.TextField(default='Some description')
 
     def __str__(self):
         return self.name
 
 
 class Enemy(models.Model):
-    name = models.CharField(max_length=100)
-    type = models.CharField(max_length=100)
-    author = models.ManyToManyField(Player)
+    name = models.CharField(max_length=100, unique=True, blank=False)
+    type = models.CharField(max_length=100, blank=False)
+    author = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
 
 
 class Adventure(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     difficulty = models.IntegerField()
     purpose = models.TextField()
     location = models.CharField(max_length=100)
@@ -114,7 +115,7 @@ class Adventure(models.Model):
 
 
 class Campaign(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     info = models.TextField()
     adventures = models.ManyToManyField(Adventure, blank=False)
 
@@ -122,12 +123,16 @@ class Campaign(models.Model):
         return self.name
 
 
+# TODO: reference to character
 class CharacterDeath(models.Model):
     time = models.DateTimeField(default=now)
-    place = models.ForeignKey('Map', on_delete=models.CASCADE, blank=False)
+    place = models.ForeignKey('Map', on_delete=models.CASCADE, blank=False, null=True)
 
 
 class Inventory(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = (('name', 'type'),)

@@ -7,5 +7,6 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('new_session/', views.new_session, name='new_session'),
     path('new_character/', views.new_character, name='new_character'),
-    path('new_player/', views.new_player, name='new_player')
+    path('new_player/', views.new_player, name='new_player'),
+    path('new_map/', views.new_map, name='new_map')
 ]
