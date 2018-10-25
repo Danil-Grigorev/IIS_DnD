@@ -136,3 +136,12 @@ class Inventory(models.Model):
 
     class Meta:
         unique_together = (('name', 'type'),)
+
+
+# Common queries
+def created_maps(user):
+    return False
+
+
+def created_sessions(user):
+    return False

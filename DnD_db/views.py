@@ -13,8 +13,8 @@ def home(request):
     context = {
         'active_sessions': active_sessions,
         'has_player': has_free_player(request.user),
-        'is_author': False,
-        'is_session_leader': False,
+        'is_author': created_maps(request.user),
+        'is_session_leader': created_sessions(request.user),
     }
     return render(request, 'home.html', context)
 
