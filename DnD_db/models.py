@@ -116,7 +116,7 @@ class Adventure(models.Model):
 
 class Campaign(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    info = models.TextField()
+    info = models.TextField(default='Campain info', blank=False)
     adventures = models.ManyToManyField(Adventure, blank=False)
 
     def __str__(self):
