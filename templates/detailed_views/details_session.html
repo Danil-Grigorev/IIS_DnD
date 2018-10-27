@@ -1,0 +1,11 @@
+{% extends 'base_nav.html' %}
+
+{% block content %}
+    <h3>Session details</h3>
+    <p>Location: {{ obj_details.location }}</p>
+    <p>Creation_date: {{ obj_details.creation_date }}</p>
+    <p>Creator: {{ obj_details.creator }}</p>
+    <p>Campaign: {{ obj_details.campaign }}</p>
+    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+    <input class="btn btn-confirm" type="submit" value="Remove">
+{% endblock %}

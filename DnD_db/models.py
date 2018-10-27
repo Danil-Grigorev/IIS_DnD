@@ -6,7 +6,7 @@ from django.utils.timezone import now
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, blank=False, default='new player', unique=True)
-    session_part = models.ManyToManyField('Session', blank=True)
+    session_part = models.OneToOneField('Session', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.nickname
@@ -86,7 +86,7 @@ class Character(models.Model):
 
 class Map(models.Model):
     name = models.CharField(max_length=100, default='New map', unique=True)
-    author = models.ManyToManyField(Player, blank=False)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=True)
     description = models.TextField(default='Some description')
 
     def __str__(self):
@@ -96,7 +96,7 @@ class Map(models.Model):
 class Enemy(models.Model):
     name = models.CharField(max_length=100, unique=True, blank=False)
     type = models.CharField(max_length=100, blank=False)
-    author = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
@@ -117,7 +117,7 @@ class Adventure(models.Model):
 class Campaign(models.Model):
     name = models.CharField(max_length=100, unique=True)
     info = models.TextField(default='Campain info', blank=False)
-    adventures = models.ManyToManyField(Adventure, blank=False)
+    adventures = models.ForeignKey(Adventure, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name

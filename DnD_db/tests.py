@@ -9,4 +9,4 @@ def has_free_player(user):
     if isinstance(user, AnonymousUser):
         return False
     p_list = Player.objects.filter(user=user)
-    return any([not p.session_part.exists() for p in p_list])
+    return any([not p.session_part for p in p_list])

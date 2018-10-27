@@ -2,16 +2,14 @@ body {
     font-family: "Lato", sans-serif;
 }
 
-/* Fixed sidenav, full height */
 .sidenav {
-    height: 100%;
-    width: 200px;
     position: fixed;
+    width: 200px;
+    height: 90%;
+    max-height: 90%;
     z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #111;
-    overflow-x: hidden;
+    background-color: lightgray;
+    overflow-x: scroll;
     padding-top: 20px;
 }
 
@@ -19,8 +17,7 @@ body {
 .sidenav a, .dropdown-btn {
     padding: 6px 8px 6px 16px;
     text-decoration: none;
-    font-size: 20px;
-    color: #818181;
+    color: black;
     display: block;
     border: none;
     background: none;
@@ -32,26 +29,24 @@ body {
 
 /* On mouse-over */
 .sidenav a:hover, .dropdown-btn:hover {
-    color: #f1f1f1;
+    color: #928f90;
 }
 
 /* Main content */
 .main {
     margin-left: 200px; /* Same as the width of the sidenav */
-    font-size: 20px; /* Increased text to enable scrolling */
     padding: 0px 10px;
 }
 
-/* Add an active class to the active dropdown button */
-.active {
-    background-color: green;
-    color: white;
-}
+/*.active {*/
+/*background-color: darkgray;*/
+/*color: white;*/
+/*}*/
 
 /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
 .dropdown-container {
     display: none;
-    background-color: #262626;
+    background-color: lavender;
     padding-left: 8px;
 }
 
@@ -60,18 +55,6 @@ body {
     float: right;
     padding-right: 8px;
 }
-
-/* Some media queries for responsiveness */
-@media screen and (max-height: 450px) {
-    .sidenav {
-        padding-top: 15px;
-    }
-
-    .sidenav a {
-        font-size: 18px;
-    }
-}
-
 
 .form-group.required label:before {
     color: red;
@@ -92,5 +75,9 @@ body {
 }
 
 .form label {
+    margin: 10px;
+}
+
+.padded {
     margin: 10px;
 }

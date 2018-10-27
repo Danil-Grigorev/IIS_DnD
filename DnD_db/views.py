@@ -1,6 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
 from .tests import *
@@ -11,6 +11,7 @@ from .tests import *
 def home(request):
     active_sessions = Session.objects.order_by('creation_date')
     context = {
+        'characters': Character.objects.filter(owner__user=request.user),
         'active_sessions': active_sessions,
         'has_player': has_free_player(request.user),
         'is_author': created_maps(request.user),
@@ -39,14 +40,13 @@ def new_session(request):
     return render(request, 'create.html', context)
 
 
-@user_passes_test(has_free_player, login_url='/home/')
+# @user_passes_test(has_free_player, login_url='/home/')
 @login_required(login_url='/login/')
 def new_character(request):
     if request.method == 'POST':
-        form = CreateCharacter(request.POST, initial={'owner': Player.objects.get(user=request.user)})
+        form = CreateCharacter(request.POST)
         if form.is_valid():
             f = form.save(commit=False)
-            f.owner = Player.objects.get(user=request.user)
             f.save()
             messages.success(request, 'Character was created successfully.')
             return redirect('home')
@@ -54,6 +54,7 @@ def new_character(request):
             messages.error(request, "Can't create character, invalid form detected")
     else:
         form = CreateCharacter()
+        form.fields['owner'].queryset = Player.objects.filter(user=request.user)
 
     context = {
         'title': 'Create character',
@@ -112,3 +113,38 @@ def new_map(request):
         'submit_name': 'Add map'
     }
     return render(request, 'create.html', context)
+
+
+@login_required(login_url='/login')
+def details_map(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login')
+def details_player(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_player.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login')
+def details_character(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_character.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login')
+def details_session(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_session.html', {'obj_details': obj})
+
+
+@login_required(login_url='/home/')
+def delete(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    if request.method == 'POST':
+        name = str(obj)
+        obj.delete()
+        messages.success(request, '{} was deleted.'.format(name))
+        return redirect('home')
+    return render(request, 'delete.html', {'obj_details': obj})

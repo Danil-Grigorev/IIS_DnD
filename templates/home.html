@@ -3,76 +3,79 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <div class="sidenav">
-        <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#clients">Clients</a>
-        <a href="#contact">Contact</a>
-        <button class="dropdown-btn">Dropdown
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-container">
-            <a href="#">Link 1</a>
-            <a href="#">Link 2</a>
-            <a href="#">Link 3</a>
-        </div>
-        <a href="#contact">Search</a>
-    </div>
     {% if not user.is_authenticated %}
         <p>You are not authenticated.</p>
     {% else %}
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-4">
-                    {% if active_sessions %}
-                        <h2>Sessions</h2>
-                        {% for session in active_sessions %}
-                            <p>Date: {{ session.creation_date }}</p>
-                            <p style="word-wrap: break-word">Location: {{ session.location }}</p>
-                            <br>
-                        {% endfor %}
-                    {% endif %}
+        <div class="container-fluid">
+        <div class="row">
+            <div class="sidenav">
+                <button class="dropdown-btn">Players
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-container">
+                    <a href="{% url 'new_player' %}">Create new player</a>
                 </div>
-                <div class="col-sm-4">
+
+                {% if has_player %}
+                    <button class="dropdown-btn">Characters
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        {% for character in characters %}
+                            <a href="{% url 'detailed_character' character.id %}">{{ character }}</a>
+                        {% endfor %}
+                        <a href="{% url 'new_character' %}">Create new character</a>
+                    </div>
+                    <button class="dropdown-btn">Sessions
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        <a href="{% url 'new_session' %}">Start new session</a>
+                        {% if is_session_leader %}
+
+                        {% endif %}
+                    </div>
+                    <button class="dropdown-btn">Maps
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        <a href="{% url 'new_map' %}">Create map</a>
+                        {% if is_author %}
+
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <div class="container-fluid">
+                    <ul class="nav nav-pills">
+                        <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="home" class="tab-pane fade in active">
+                            <h3>Sessions</h3>
+                            {% for session in active_sessions %}
+                                <p><a href="{">Session</a></p>
+                                <p>Creation date: {{ session.creation_date }}</p>
+                                <p></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                </div>
+            <div class="col-sm-2">
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
+                            {% if message.tags == 'error' %}
+                                <div class="alert alert-danger" role="alert">
+                            {% else %}
+                                <div class="alert alert-{{ message.tags }}" role="alert">
+                            {% endif %}
                                 {{ message }}
                             </div>
                         {% endfor %}
                     {% endif %}
-                    <h2>TITLE HEADING</h2>
-                    <h5>Title description, Dec 7, 2017</h5>
-                    <div class="fakeimg">Fake Image</div>
-                    <p>Some text..</p>
-                    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do
-                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                        nostrud exercitation ullamco.</p>
-                    <br>
-                    <h2>TITLE HEADING</h2>
-                    <h5>Title description, Sep 2, 2017</h5>
-                    <div class="fakeimg">Fake Image</div>
-                    <p>Some text..</p>
-                    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do
-                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-                        nostrud exercitation ullamco.</p>
-                </div>
-                <div class="col-sm-4">
-                    <ul>
-                        <li><a href="{% url 'new_player' %}">Create new player</a></li>
-                        {% if has_player %}
-                            <li><a href="{% url 'new_character' %}">Create new character</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'new_session' %}">Start new session</a></li>
-                        {% if is_session_leader %}
-
-                        {% endif %}
-                        <li><a href="{% url 'new_map' %}">Create map</a></li>
-                        {% if is_author %}
-
-                        {% endif %}
-                    </ul>
-
                 </div>
             </div>
         </div>
