@@ -40,9 +40,8 @@ class CreateMap(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
             'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map description'}),
-            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'description', 'author']
+        fields = ['name', 'description']
 
 
 class CreateEnemy(forms.ModelForm):
@@ -51,9 +50,8 @@ class CreateEnemy(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
             'type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
-            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'type', 'author']
+        fields = ['name', 'type']
 
 
 class CreateAdventure(forms.ModelForm):
