@@ -40,8 +40,9 @@ class CreateMap(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
             'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map description'}),
+            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'author']
 
 
 class CreateEnemy(forms.ModelForm):
@@ -49,6 +50,33 @@ class CreateEnemy(forms.ModelForm):
         model = Enemy
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
-            'type': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
+            'type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
+            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'type']
+        fields = ['name', 'type', 'author']
+
+
+class CreateAdventure(forms.ModelForm):
+    class Meta:
+        model = Adventure
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+            'difficulty': forms.NumberInput(),
+            'purpose': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
+            'map': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
+            'enemies': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
+
+        }
+        fields = ['name', 'difficulty', 'purpose', 'location', 'map', 'enemies']
+
+
+class CreateCampaign(forms.ModelForm):
+    class Meta:
+        model = Campaign
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign name'}),
+            'info': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign description'}),
+            'adventures': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+        }
+        fields = ['name', 'info', 'adventures']

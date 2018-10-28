@@ -124,6 +124,7 @@ def details_map(request, id, model):
     obj = get_object_or_404(model, id=id)
     return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
 
+
 @login_required(login_url='/login')
 def details_player(request, id, model):
     obj = get_object_or_404(model, id=id)
@@ -185,5 +186,51 @@ def new_enemy(request):
         'form': form,
         'name': 'New enemy',
         'submit_name': 'Add enemy'
+    }
+    return render(request, 'create.html', context)
+
+
+@login_required(login_url='/login/')
+def new_adventure(request):
+    if request.method == 'POST':
+        form = CreateAdventure(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.save()
+            messages.success(request, 'Adventure was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create adventure, invalid form detected")
+    else:
+        form = CreateAdventure()
+
+    context = {
+        'title': 'Create adventure',
+        'form': form,
+        'name': 'New adventure',
+        'submit_name': 'Add adventure'
+    }
+    return render(request, 'create.html', context)
+
+
+@login_required(login_url='/login/')
+def new_campaign(request):
+    if request.method == 'POST':
+        form = CreateCampaign(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.save()
+            messages.success(request, 'Campaign was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create campaign, invalid form detected")
+    else:
+        form = CreateCampaign()
+
+    context = {
+        'title': 'Create campaign',
+        'form': form,
+        'name': 'New campaign',
+        'submit_name': 'Add campaign'
     }
     return render(request, 'create.html', context)
