@@ -151,3 +151,28 @@ def delete(request, id, model):
         messages.success(request, '{} was deleted.'.format(name))
         return redirect('home')
     return render(request, 'delete.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login/')
+def new_enemy(request):
+    if request.method == 'POST':
+        form = CreateEnemy(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.save()
+            messages.success(request, 'Enemy was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create enemy, invalid form detected")
+    else:
+        form = CreateEnemy()
+        form.fields['author'].queryset = Player.objects.filter(user=request.user)
+
+    context = {
+        'title': 'Create enemy',
+        'form': form,
+        'name': 'New enemy',
+        'submit_name': 'Add enemy'
+    }
+    return render(request, 'create.html', context)
+

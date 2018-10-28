@@ -54,3 +54,14 @@ class CreateMap(forms.ModelForm):
     #     if commit:
     #         s.save()
     #     return s
+
+
+class CreateEnemy(forms.ModelForm):
+    class Meta:
+        model = Enemy
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
+            'type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
+            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
+        }
+        fields = ['name', 'type', 'author']
