@@ -35,6 +35,27 @@
                         {% endfor %}
                         <a href="{% url 'new_session' %}">Start new session</a>
                     </div>
+
+                    <button class="dropdown-btn">Adventures
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        {% for adventure in adventures %}
+                            <a href="{{ adventure.get_absolute_url }}">{{ adventure }}</a>
+                        {% endfor %}
+                        <a href="{% url 'new_adventure' %}">Create new adventure</a>
+                    </div>
+
+                    <button class="dropdown-btn">Campaigns
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        {% for campaign in campaigns %}
+                            <a href="{{ campaign.get_absolute_url }}">{{ campaign }}</a>
+                        {% endfor %}
+                        <a href="{% url 'new_campaign' %}">Create new campaign</a>
+                    </div>
+
                     <button class="dropdown-btn">Maps
                         <i class="fa fa-caret-down"></i>
                     </button>
@@ -54,6 +75,16 @@
                         {% endfor %}
                         <a href="{% url 'new_enemy' %}">Create enemy</a>
                     </div>
+
+                    <button class="dropdown-btn">Items
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        {% for item in items %}
+                            <a href="{{ item.get_absolute_url }}">{{ item }}</a>
+                        {% endfor %}
+                        <a href="{% url 'new_inventory' %}">Create item</a>
+                    </div>
                 {% endif %}
             </div>
             <div class="col-sm-2"></div>
@@ -65,11 +96,32 @@
                     <div class="tab-content">
                         <div id="home" class="tab-pane fade in active">
                             <h3>Sessions</h3>
-                            {% for session in active_sessions %}
-                                <p><a href="{">Session</a></p>
+                            {% for session in sessions %}
+                                <p><a href="{{ session.get_absolute_url }}">Session</a></p>
                                 <p>Creation date: {{ session.creation_date }}</p>
                                 <p></p>
                             {% endfor %}
+                            <label>
+                                <ul>
+                                    <li onclick="this.parentNode.removeChild(this);">
+                                        <input type="hidden" name="ingredients[]" value="Cheese"/>
+                                        Cheese
+                                    </li>
+                                    <li onclick="this.parentNode.removeChild(this);">
+                                        <input type="hidden" name="ingredients[]" value="Ham"/>
+                                        Ham
+                                    </li>
+                                    <li onclick="this.parentNode.removeChild(this);">
+                                        <input type="hidden" name="ingredients[]" value="Mushrooms"/>
+                                        Mushrooms
+                                    </li>
+                                </ul>
+                                <select onchange="selectIngredient(this);">
+                                    <option value="Cheese">Cheese</option>
+                                    <option value="Olives">Olives</option>
+                                    <option value="Pepperoni">Pepperoni</option>
+                                </select>
+                            </label>
                         </div>
                     </div>
                 </div>

@@ -20,13 +20,28 @@
         <title>DnD IS</title>
     {% endif %}
 
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="jquery-3.3.1.min.js"></script>
+
+    <script>
+        function selectIngredient(select) {
+            var $ul = $(select).prev('ul');
+
+            if ($ul.find('input[value=' + $(select).val() + ']').length == 0)
+                $ul.append('<li onclick="$(this).remove();">' +
+                    '<input type="hidden" name="ingredients[]" value="' +
+                    $(select).val() + '" /> ' +
+                    $(select).find('option[selected]').text() + '</li>');
+        }
+    </script>
+
     <script>
         function return_back() {
             history.back();
         }
     </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
     <main>

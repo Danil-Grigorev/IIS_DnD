@@ -13,13 +13,16 @@ urlpatterns = [
     path('new_enemy/', views.new_enemy, name='new_enemy'),
     path('new_adventure/', views.new_adventure, name='new_adventure'),
     path('new_campaign/', views.new_campaign, name='new_campaign'),
+    path('new_inventory/', views.new_inventory, name='new_inventory'),
 
     path('map_details/<int:id>/', views.details_map, {'model': Map}, name='detailed_map'),
     path('player_details/<int:id>/', views.details_player, {'model': Player}, name='detailed_player'),
     path('character_details/<int:id>/', views.details_character, {'model': Character}, name='detailed_character'),
     path('session_details/<int:id>/', views.details_session, {'model': Session}, name='detailed_session'),
     path('enemy_details/<int:id>/', views.details_enemy, {'model': Enemy}, name='detailed_enemy'),
-    path('adventure_details/<int:id/>', views.details_adventure, {'model': Adventure}, name='detailed_adventure'),
+    path('adventure_details/<int:id>/', views.details_adventure, {'model': Adventure}, name='detailed_adventure'),
+    path('inventory_details/<int:id>/', views.details_inventory, {'model': Inventory}, name='detailed_inventory'),
+    path('campaign_details/<int:id>/', views.details_campaign, {'model': Campaign}, name='detailed_campaign'),
 
     path('map_details/<int:id>/delete', views.delete, {'model': Map}, name='delete_map'),
     path('player_details/<int:id>/delete', views.delete, {'model': Player}, name='delete_player'),
@@ -27,4 +30,6 @@ urlpatterns = [
     path('session_details/<int:id>/delete', views.delete, {'model': Session}, name='delete_session'),
     path('enemy_details/<int:id/delete>', views.delete, {'model': Enemy}, name='delete_enemy'),
     path('adventure_details/<int:id/delete>', views.delete, {'model': Adventure}, name='delete_adventure'),
+    path('inventory_details/<int:id>/delete', views.delete, {'model': Inventory}, name='delete_inventory'),
+    path('campaign_details/<int:id>/delete', views.delete, {'model': Campaign}, name='delete_campaign'),
 ]

@@ -6,20 +6,19 @@ from .forms import *
 from .tests import *
 
 
-# Create your views here.
-
 def home(request):
     if request.user.is_anonymous:
         context = {}
     else:
         context = {
             'characters': Character.objects.filter(owner__user=request.user),
+            'adventures': Adventure.objects.all(),
+            'campaigns': Campaign.objects.all(),
             'sessions': Session.objects.all(),
             'enemies': Enemy.objects.all(),
             'maps': Map.objects.all(),
+            'items': Inventory.objects.all(),
             'has_player': has_free_player(request.user),
-            'is_author': created_maps(request.user),
-            'is_session_leader': created_sessions(request.user),
         }
     return render(request, 'home.html', context)
 
@@ -120,6 +119,12 @@ def new_map(request):
 
 
 @login_required(login_url='/login')
+def details_campaign(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_campaign.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login')
 def details_map(request, id, model):
     obj = get_object_or_404(model, id=id)
     return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
@@ -155,6 +160,12 @@ def details_adventure(request, id, model):
     return render(request, 'detailed_views/details_adventure.html', {'obj_details': obj})
 
 
+@login_required(login_url='/login')
+def details_inventory(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_inventory.html', {'obj_details': obj})
+
+
 @login_required(login_url='/home/')
 def delete(request, id, model):
     obj = get_object_or_404(model, id=id)
@@ -188,6 +199,9 @@ def new_enemy(request):
         'submit_name': 'Add enemy'
     }
     return render(request, 'create.html', context)
+
+
+Campaign
 
 
 @login_required(login_url='/login/')
@@ -232,5 +246,29 @@ def new_campaign(request):
         'form': form,
         'name': 'New campaign',
         'submit_name': 'Add campaign'
+    }
+    return render(request, 'create.html', context)
+
+
+@login_required(login_url='/login/')
+def new_inventory(request):
+    if request.method == 'POST':
+        form = CreateInventory(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.owner = None
+            f.save()
+            messages.success(request, 'Item was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create item, invalid form detected")
+    else:
+        form = CreateInventory()
+
+    context = {
+        'title': 'Create item',
+        'form': form,
+        'name': 'New item',
+        'submit_name': 'Add item'
     }
     return render(request, 'create.html', context)

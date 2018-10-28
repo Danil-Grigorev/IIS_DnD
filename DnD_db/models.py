@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.shortcuts import reverse
 from django.utils.timezone import now
 
 
@@ -25,7 +26,7 @@ class Session(models.Model):
         return "{}: {}".format(self.pk, self.location)
 
     def get_absolute_url(self):
-        return '/session_details/{}'.format(self.id)
+        return reverse('detailed_session', kwargs={'id': self.id})
 
 
 class Character(models.Model):
@@ -90,7 +91,8 @@ class Character(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return '/character_details/{}'.format(self.id)
+        return reverse('detailed_character', kwargs={'id': self.id})
+
 
 class Map(models.Model):
     name = models.CharField(max_length=100, default='New map', unique=True)
@@ -101,7 +103,7 @@ class Map(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return '/map_details/{}'.format(self.id)
+        return reverse('detailed_map', kwargs={'id': self.id})
 
 
 class Enemy(models.Model):
@@ -131,11 +133,11 @@ class Enemy(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return '/enemy_details/{}'.format(self.id)
+        return reverse('detailed_enemy', kwargs={'id': self.id})
 
 
 class Adventure(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, default='New adventure')
     difficulty = models.IntegerField(default=0)
     purpose = models.TextField(default='New purpose')
     location = models.CharField(max_length=100, default='Some location')
@@ -146,7 +148,7 @@ class Adventure(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return '/adventure_details/{}'.format(self.id)
+        return reverse('detailed_adventure', kwargs={'id': self.id})
 
 
 class Campaign(models.Model):
@@ -158,7 +160,7 @@ class Campaign(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return '/campaign_details/{}'.format(self.id)
+        return reverse('detailed_campaign', kwargs={'id': self.id})
 
 
 # TODO: reference to character
@@ -168,15 +170,30 @@ class CharacterDeath(models.Model):
 
 
 class Inventory(models.Model):
-    name = models.CharField(max_length=100)
-    type = models.CharField(max_length=100)
+    WP = 'Weapon'
+    AR = 'Armor'
+    FO = 'Food'
+    PO = 'Potion'
+    TO = 'Tool'
+    OT = 'Other'
+
+    TYPES = (
+        (WP, WP),
+        (AR, AR),
+        (FO, FO),
+        (PO, PO),
+        (TO, TO),
+        (OT, OT),
+    )
+    name = models.CharField(max_length=100, default='New item')
+    type = models.CharField(max_length=6, blank=False, choices=TYPES, default=WP)
     owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
-        return '/inventory_details/{}'.format(self.id)
+        return reverse('detailed_inventory', kwargs={'id': self.id})
 
     class Meta:
         unique_together = (('name', 'type'),)

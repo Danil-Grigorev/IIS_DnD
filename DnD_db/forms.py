@@ -78,3 +78,13 @@ class CreateCampaign(forms.ModelForm):
             'adventures': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
         }
         fields = ['name', 'info', 'adventures']
+
+
+class CreateInventory(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Item name'}),
+            'type': forms.Select(attrs={'class': 'form-control'}),
+        }
+        fields = ['name', 'type', ]
