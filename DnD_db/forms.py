@@ -13,6 +13,9 @@ class CreateSession(forms.ModelForm):
         fields = ['location', 'campaign']
 
 
+#test
+
+
 class CreateCharacter(forms.ModelForm):
     class Meta:
         model = Character
