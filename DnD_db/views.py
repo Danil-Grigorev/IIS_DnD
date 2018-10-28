@@ -10,13 +10,16 @@ from .tests import *
 
 def home(request):
     active_sessions = Session.objects.order_by('creation_date')
-    context = {
-        'characters': Character.objects.filter(owner__user=request.user),
-        'active_sessions': active_sessions,
-        'has_player': has_free_player(request.user),
-        'is_author': created_maps(request.user),
-        'is_session_leader': created_sessions(request.user),
-    }
+    if request.user.is_anonymous:
+        context = {}
+    else:
+        context = {
+            'characters': Character.objects.filter(owner__user=request.user),
+            'active_sessions': active_sessions,
+            'has_player': has_free_player(request.user),
+            'is_author': created_maps(request.user),
+            'is_session_leader': created_sessions(request.user),
+        }
     return render(request, 'home.html', context)
 
 
