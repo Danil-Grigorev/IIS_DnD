@@ -10,8 +10,9 @@ urlpatterns = [
     path('new_character/', views.new_character, name='new_character'),
     path('new_player/', views.new_player, name='new_player'),
     path('new_map/', views.new_map, name='new_map'),
-    path('new_enemy', views.new_enemy, name='new_enemy'),
-    path('new_adventure', views.new_adventure, name='new_adventure'),
+    path('new_enemy/', views.new_enemy, name='new_enemy'),
+    path('new_adventure/', views.new_adventure, name='new_adventure'),
+    path('new_campaign/', views.new_campaign, name='new_campaign'),
 
 
     path('map_details/<int:id>/', views.details_map, {'model': Map}, name='detailed_map'),

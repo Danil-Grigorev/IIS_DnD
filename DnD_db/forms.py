@@ -80,3 +80,14 @@ class CreateAdventure(forms.ModelForm):
 
         }
         fields = ['name', 'difficulty', 'purpose', 'location', 'map', 'enemies']
+
+
+class CreateCampaign(forms.ModelForm):
+    class Meta:
+        model = Campaign
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign name'}),
+            'info': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign description'}),
+            'adventures': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+        }
+        fields = ['name', 'info', 'adventures']

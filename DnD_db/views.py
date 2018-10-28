@@ -192,9 +192,32 @@ def new_adventure(request):
         form = CreateAdventure()
 
     context = {
-        'title': 'Create enemy',
+        'title': 'Create adventure',
         'form': form,
-        'name': 'New enemy',
-        'submit_name': 'Add enemy'
+        'name': 'New adventure',
+        'submit_name': 'Add adventure'
+    }
+    return render(request, 'create.html', context)
+
+
+@login_required(login_url='/login/')
+def new_campaign(request):
+    if request.method == 'POST':
+        form = CreateCampaign(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.save()
+            messages.success(request, 'Campaign was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create campaign, invalid form detected")
+    else:
+        form = CreateCampaign()
+
+    context = {
+        'title': 'Create campaign',
+        'form': form,
+        'name': 'New campaign',
+        'submit_name': 'Add campaign'
     }
     return render(request, 'create.html', context)
