@@ -13,9 +13,6 @@ class CreateSession(forms.ModelForm):
         fields = ['location', 'campaign']
 
 
-#test
-
-
 class CreateCharacter(forms.ModelForm):
     class Meta:
         model = Character
@@ -43,17 +40,8 @@ class CreateMap(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
             'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map description'}),
-            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'description', 'author']
-
-    # def save(self, user=None, commit=True):
-    #     s = Map()
-    #     if user:
-    #         s.author.add(user)
-    #     if commit:
-    #         s.save()
-    #     return s
+        fields = ['name', 'description']
 
 
 class CreateEnemy(forms.ModelForm):
@@ -61,7 +49,6 @@ class CreateEnemy(forms.ModelForm):
         model = Enemy
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
-            'type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
-            'author': forms.SelectMultiple(attrs={'class': 'form-control'})
+            'type': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
         }
-        fields = ['name', 'type', 'author']
+        fields = ['name', 'type']

@@ -9,13 +9,14 @@ from .tests import *
 # Create your views here.
 
 def home(request):
-    active_sessions = Session.objects.order_by('creation_date')
     if request.user.is_anonymous:
         context = {}
     else:
         context = {
             'characters': Character.objects.filter(owner__user=request.user),
-            'active_sessions': active_sessions,
+            'sessions': Session.objects.all(),
+            'enemies': Enemy.objects.all(),
+            'maps': Map.objects.all(),
             'has_player': has_free_player(request.user),
             'is_author': created_maps(request.user),
             'is_session_leader': created_sessions(request.user),
@@ -100,6 +101,7 @@ def new_map(request):
         form = CreateMap(request.POST)
         if form.is_valid():
             f = form.save(commit=False)
+            f.author = request.user
             f.save()
             messages.success(request, 'Map was created successfully.')
             return redirect('home')
@@ -107,7 +109,6 @@ def new_map(request):
             messages.error(request, "Can't create map, invalid form detected")
     else:
         form = CreateMap()
-        form.fields['author'].queryset = Player.objects.filter(user=request.user)
 
     context = {
         'title': 'Create map',
@@ -122,7 +123,6 @@ def new_map(request):
 def details_map(request, id, model):
     obj = get_object_or_404(model, id=id)
     return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
-
 
 @login_required(login_url='/login')
 def details_player(request, id, model):
@@ -142,6 +142,18 @@ def details_session(request, id, model):
     return render(request, 'detailed_views/details_session.html', {'obj_details': obj})
 
 
+@login_required(login_url='/login')
+def details_enemy(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_enemy.html', {'obj_details': obj})
+
+
+@login_required(login_url='/login')
+def details_adventure(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    return render(request, 'detailed_views/details_adventure.html', {'obj_details': obj})
+
+
 @login_required(login_url='/home/')
 def delete(request, id, model):
     obj = get_object_or_404(model, id=id)
@@ -159,6 +171,7 @@ def new_enemy(request):
         form = CreateEnemy(request.POST)
         if form.is_valid():
             f = form.save(commit=False)
+            f.author = request.user
             f.save()
             messages.success(request, 'Enemy was created successfully.')
             return redirect('home')
@@ -166,7 +179,6 @@ def new_enemy(request):
             messages.error(request, "Can't create enemy, invalid form detected")
     else:
         form = CreateEnemy()
-        form.fields['author'].queryset = Player.objects.filter(user=request.user)
 
     context = {
         'title': 'Create enemy',
@@ -175,4 +187,3 @@ def new_enemy(request):
         'submit_name': 'Add enemy'
     }
     return render(request, 'create.html', context)
-

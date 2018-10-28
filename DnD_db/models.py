@@ -11,6 +11,9 @@ class Player(models.Model):
     def __str__(self):
         return self.nickname
 
+    def get_absolute_url(self):
+        return '/player_details/{}'.format(self.id)
+
 
 class Session(models.Model):
     location = models.CharField(max_length=100, blank=False, default='Location for session')
@@ -21,61 +24,64 @@ class Session(models.Model):
     def __str__(self):
         return "{}: {}".format(self.pk, self.location)
 
+    def get_absolute_url(self):
+        return '/session_details/{}'.format(self.id)
+
 
 class Character(models.Model):
-    HB = 'HB'
-    KU = 'KU'
-    DW = 'DW'
-    EL = 'EL'
-    HM = 'HM'
-    BA = 'BA'
-    KR = 'KR'
+    HB = 'Hobbit'
+    KU = 'Kuduk'
+    DW = 'Dwarf'
+    EL = 'Elf'
+    HM = 'Human'
+    BA = 'Barbar'
+    KR = 'Kroll'
     RACES = (
-        (HB, 'Hobbit'),
-        (KU, 'Kuduk'),
-        (DW, 'Dwarf'),
-        (EL, 'Elf'),
-        (HM, 'Human'),
-        (BA, 'Barbar'),
-        (KR, 'Kroll')
+        (HB, HB),
+        (KU, KU),
+        (DW, DW),
+        (EL, EL),
+        (HM, HM),
+        (BA, BA),
+        (KR, KR),
     )
 
-    WA = 'WA'
-    FI = 'FI'
-    FE = 'FE'
-    RA = 'RA'
-    ST = 'ST'
-    DR = 'DR'
-    WI = 'WI'
-    SO = 'SO'
-    MA = 'MA'
-    AL = 'AL'
-    TE = 'TE'
-    PY = 'PY'
-    TH = 'TH'
-    RO = 'RO'
-    SI = 'SI'
+    WA = 'Warrior'
+    FI = 'Fighter'
+    FE = 'Fencer'
+    RA = 'Ranger'
+    ST = 'Strider'
+    DR = 'Druid'
+    WI = 'Wizard'
+    SO = 'Sorcerer'
+    MA = 'Mage'
+    AL = 'Alchemist'
+    TE = 'Theurg'
+    PY = 'Pyrofor'
+    TH = 'Thief'
+    RO = 'Robber'
+    SI = 'Sicco'
     SPECS = (
-        (WA, 'Warrior'),
-        (FI, 'Fighter'),
-        (FE, 'Fencer'),
-        (RA, 'Ranger'),
-        (ST, 'Strider'),
-        (DR, 'Druid'),
-        (WI, 'Wizard'),
-        (SO, 'Sorcerer'),
-        (MA, 'Mage'),
-        (AL, 'Alchemist'),
-        (TE, 'Theurg'),
-        (PY, 'Pyrofor'),
-        (TH, 'Thief'),
-        (RO, 'Robber'),
-        (SI, 'Sicco'),
+        (WA, WA),
+        (FI, FI),
+        (FE, FE),
+        (RA, RA),
+        (ST, ST),
+        (DR, DR),
+        (WI, WI),
+        (SO, SO),
+        (MA, MA),
+        (AL, AL),
+        (TE, TE),
+        (PY, PY),
+        (TH, TH),
+        (RO, RO),
+        (SI, SI),
     )
 
     name = models.CharField(max_length=100, unique=True, default='New character')
-    race = models.CharField(max_length=2, choices=RACES, default=HM)
-    speciality = models.CharField(max_length=2, choices=SPECS, default=WA)
+    race = models.CharField(max_length=6, choices=RACES, default=HM)
+    speciality = models.CharField(max_length=9, choices=SPECS, default=WA)
     level = models.IntegerField(default=1)
     owner = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
     death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
@@ -83,6 +89,8 @@ class Character(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return '/character_details/{}'.format(self.id)
 
 class Map(models.Model):
     name = models.CharField(max_length=100, default='New map', unique=True)
@@ -92,35 +100,65 @@ class Map(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return '/map_details/{}'.format(self.id)
+
 
 class Enemy(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
-    type = models.CharField(max_length=100, blank=False)
+    DE = 'Demon'
+    DR = 'Dragon'
+    SN = 'Snake'
+    IN = 'Insect'
+    HU = 'Humanoid'
+    MA = 'Magical'
+    ST = 'Statues'
+    CR = 'Creature'
+    ENEMIES = (
+        (DE, DE),
+        (DR, DR),
+        (SN, SN),
+        (IN, IN),
+        (HU, HU),
+        (MA, MA),
+        (ST, ST),
+        (CR, CR),
+    )
+    name = models.CharField(max_length=100, unique=True, blank=False, default='New enemy')
+    type = models.CharField(max_length=8, blank=False, choices=ENEMIES, default=DE)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return '/enemy_details/{}'.format(self.id)
+
 
 class Adventure(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    difficulty = models.IntegerField()
-    purpose = models.TextField()
-    location = models.CharField(max_length=100)
+    difficulty = models.IntegerField(default=0)
+    purpose = models.TextField(default='New purpose')
+    location = models.CharField(max_length=100, default='Some location')
     map = models.ManyToManyField(Map, blank=False)
     enemies = models.ManyToManyField(Enemy, blank=True)
 
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return '/adventure_details/{}'.format(self.id)
+
 
 class Campaign(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    info = models.TextField(default='Campain info', blank=False)
-    adventures = models.ForeignKey(Adventure, on_delete=models.CASCADE, blank=False, null=True)
+    name = models.CharField(max_length=100, unique=True, default='New campaign')
+    info = models.TextField(default='Campaign info', blank=False)
+    adventures = models.ManyToManyField(Adventure, blank=False)
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return '/campaign_details/{}'.format(self.id)
 
 
 # TODO: reference to character
@@ -133,6 +171,12 @@ class Inventory(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return '/inventory_details/{}'.format(self.id)
 
     class Meta:
         unique_together = (('name', 'type'),)

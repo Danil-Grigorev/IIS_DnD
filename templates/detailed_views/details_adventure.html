@@ -1,0 +1,13 @@
+{% extends 'base_nav.html' %}
+
+{% block content %}
+    <h3>Adventure details</h3>
+    <p>Name: {{ obj_details.name }}</p>
+    <p>Difficulty: {{ obj_details.difficulty }}</p>
+    <p>Purpose: {{ obj_details.purpose }}</p>
+    <p>Location: {{ obj_details.location }}</p>
+    <p>Map: {{ obj_details.map }}</p>
+    <p>Enemies: {{ obj_details.enemies }}</p>
+    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+    <a href="{% url 'delete_character' obj_details.id %}" class="btn btn-default">Remove</a>
+{% endblock %}

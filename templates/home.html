@@ -22,7 +22,7 @@
                     </button>
                     <div class="dropdown-container">
                         {% for character in characters %}
-                            <a href="{% url 'detailed_character' character.id %}">{{ character }}</a>
+                            <a href="{{ character.get_absolute_url }}">{{ character }}</a>
                         {% endfor %}
                         <a href="{% url 'new_character' %}">Create new character</a>
                     </div>
@@ -30,19 +30,29 @@
                         <i class="fa fa-caret-down"></i>
                     </button>
                     <div class="dropdown-container">
+                        {% for session in sessions %}
+                            <a href="{{ session.get_absolute_url }}">{{ session }}</a>
+                        {% endfor %}
                         <a href="{% url 'new_session' %}">Start new session</a>
-                        {% if is_session_leader %}
-
-                        {% endif %}
                     </div>
                     <button class="dropdown-btn">Maps
                         <i class="fa fa-caret-down"></i>
                     </button>
                     <div class="dropdown-container">
+                        {% for map in maps %}
+                            <a href="{{ map.get_absolute_url }}">{{ map }}</a>
+                        {% endfor %}
                         <a href="{% url 'new_map' %}">Create map</a>
-                        {% if is_author %}
+                    </div>
 
-                        {% endif %}
+                    <button class="dropdown-btn">Enemies
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-container">
+                        {% for enemy in enemies %}
+                            <a href="{{ enemy.get_absolute_url }}">{{ enemy }}</a>
+                        {% endfor %}
+                        <a href="{% url 'new_enemy' %}">Create enemy</a>
                     </div>
                 {% endif %}
             </div>
