@@ -65,3 +65,18 @@ class CreateEnemy(forms.ModelForm):
             'author': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
         fields = ['name', 'type', 'author']
+
+
+class CreateAdventure(forms.ModelForm):
+    class Meta:
+        model = Adventure
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+            'difficulty': forms.NumberInput(),
+            'purpose': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adventure name'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
+            'map': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Map name'}),
+            'enemies': forms.SelectMultiple(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
+
+        }
+        fields = ['name', 'difficulty', 'purpose', 'location', 'map', 'enemies']

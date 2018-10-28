@@ -176,3 +176,25 @@ def new_enemy(request):
     }
     return render(request, 'create.html', context)
 
+
+@login_required(login_url='/login/')
+def new_adventure(request):
+    if request.method == 'POST':
+        form = CreateAdventure(request.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.save()
+            messages.success(request, 'Adventure was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create adventure, invalid form detected")
+    else:
+        form = CreateAdventure()
+
+    context = {
+        'title': 'Create enemy',
+        'form': form,
+        'name': 'New enemy',
+        'submit_name': 'Add enemy'
+    }
+    return render(request, 'create.html', context)
