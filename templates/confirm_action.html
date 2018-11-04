@@ -1,14 +1,14 @@
 {% extends 'base_nav.html' %}
 
-{% block title %}{{ obj_details }} - delete{% endblock %}
+{% block title %}{{ obj_details }} - {{ operation }}{% endblock %}
 
 {% block content %}
     <form method='POST'>
         {% csrf_token %}
         <div class="container">
-            <p>Do you want to delete {{ obj_details }}?</p>
+            <p>Do you want to accept {{ operation }} for {{ obj_details }}?</p>
             <p>
-                <input type="submit" value="Delete" class="btn btn-danger">
+                <input type="submit" value="{{ operation }}" class="btn btn-danger">
                 <input class="btn btn-primary pull-right" type="reset" onclick="return_back()" value="Back">
             </p>
         </div>

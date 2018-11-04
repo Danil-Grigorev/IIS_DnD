@@ -4,10 +4,19 @@
     <h3>Session details</h3>
     <p>Location: {{ obj_details.location }}</p>
     <p>Creation_date: {{ obj_details.creation_date }}</p>
-    <p>Creator: {{ obj_details.creator }}</p>
+    <p>Creator: {{ obj_details.leader }}</p>
     <p>Campaign: {{ obj_details.campaign }}</p>
 
     <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
-    <a href="{% url 'delete_session' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
-    <a href="{% url 'edit_session' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
+    {% if user.profile.role == "Session leader" and is_creator %}
+        <a href="{% url 'delete_session' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+        <a href="{% url 'edit_session' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
+    {% elif user.profile.role == "Player" %}
+        {% if participator %}
+            <a href="{{ obj_details.get_participator_url }}" role="button" class="btn btn-success">Open</a>
+            <a href="{% url 'leave_session' obj_details.id %}" role="button" class="btn btn-danger">Leave</a>
+        {% else %}
+            <a href="{% url 'take_session_part' obj_details.id %}" role="button" class="btn btn-success">Join</a>
+        {% endif %}
+    {% endif %}
 {% endblock %}

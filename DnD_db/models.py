@@ -43,9 +43,9 @@ class Player(models.Model):
 
 
 class Session(models.Model):
-    location = models.CharField(max_length=100, blank=False, default='Location for session')
+    location = models.CharField(max_length=100, blank=False, default='Location for session', unique=True)
     creation_date = models.DateTimeField(default=now)
-    creator = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
+    leader = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
     campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
 
     def __str__(self):
@@ -125,8 +125,8 @@ class Character(models.Model):
 
 class Map(models.Model):
     name = models.CharField(max_length=100, default='New map', unique=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=True)
     description = models.TextField(default='Some description')
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
@@ -156,7 +156,7 @@ class Enemy(models.Model):
     )
     name = models.CharField(max_length=100, unique=True, blank=False, default='New enemy')
     type = models.CharField(max_length=8, blank=False, choices=ENEMIES, default=DE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=True)
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
@@ -172,6 +172,7 @@ class Adventure(models.Model):
     location = models.CharField(max_length=100, default='Some location')
     map = models.ManyToManyField(Map, blank=False)
     enemies = models.ManyToManyField(Enemy, blank=True)
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
@@ -184,6 +185,7 @@ class Campaign(models.Model):
     name = models.CharField(max_length=100, unique=True, default='New campaign')
     info = models.TextField(default='Campaign info', blank=False)
     adventures = models.ManyToManyField(Adventure, blank=False)
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
@@ -217,21 +219,10 @@ class Inventory(models.Model):
     name = models.CharField(max_length=100, default='New item')
     type = models.CharField(max_length=6, blank=False, choices=TYPES, default=WP)
     owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.PROTECT)
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
         return reverse('detailed_inventory', kwargs={'id': self.id})
-
-    class Meta:
-        unique_together = (('name', 'type'),)
-
-
-# Common queries
-def created_maps(user):
-    return False
-
-
-def created_sessions(user):
-    return False

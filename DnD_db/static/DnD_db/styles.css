@@ -11,6 +11,12 @@ body {
     background-color: lightgray;
     overflow-x: scroll;
     padding-top: 20px;
+    border-radius: 0 15px 0 0;
+}
+
+.col {
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 /* Style the sidenav links and the dropdown button */

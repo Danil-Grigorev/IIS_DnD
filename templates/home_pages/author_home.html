@@ -14,7 +14,7 @@
             <a href="{% url 'new_player' %}">Create new player</a>
         </div>
 
-        {% if has_player %}
+        {% if players %}
             <button class="dropdown-btn">Characters
                 <i class="fa fa-caret-down"></i>
             </button>
@@ -80,5 +80,57 @@
 
 {% block main_view %}
     <div class="container-fluid">
+        {% if not enemies %}
+            <div class="row">
+                <div class="col col-sm-6">
+                    <p>You have not yet created any enemy.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_enemy' %}" class="btn btn-success" role="button">Create enemy</a>
+                </div>
+            </div>
+        {% else %}
+
+        {% endif %}
+
+        {% if not maps %}
+            <div class="row">
+                <div class="col col-sm-6">
+                    <p>You have not yet created any map.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_map' %}" class="btn btn-success" role="button">Create map</a>
+                </div>
+            </div>
+        {% else %}
+
+        {% endif %}
+
+        {% if not adventures %}
+            <div class="row">
+                <div class="col col-sm-6">
+                    <p>You have not yet created any adventure.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_adventure' %}" class="btn btn-success" role="button">Create adventure</a>
+                </div>
+            </div>
+        {% else %}
+
+        {% endif %}
+
+        {% if not campaigns %}
+            <div class="row">
+                <div class="col col-sm-6">
+                    <p>You have not yet created any campaign.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_campaign' %}" class="btn btn-success" role="button">Create campaign</a>
+                </div>
+            </div>
+        {% else %}
+
+        {% endif %}
+
     </div>
 {% endblock %}

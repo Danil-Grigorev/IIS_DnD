@@ -20,16 +20,33 @@
 
 {% block main_view %}
     <div class="container-fluid">
-        {% if has_player %}
+        {% if players %}
             {% if participated_sessions %}
-                {% for part in participated_sessions %}
-                    <a href="{{ part.get_participator_url }}">{{ invitation }} - Open</a>
-                {% endfor %}
+                <div class="row">
+                    {% for part in participated_sessions %}
+                        <div class="col col-sm-6">
+                            <a href="{{ part.get_absolute_url }}">{{ part }}</a>
+                        </div>
+                        <div class="col col-sm-2">
+                            <a href="{{ part.get_participator_url }}" class="btn btn-success" role="button">Show</a>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
             {% if invited_sessions %}
-                <h3>Sessions:</h3>
+                <h5>Invitations:</h5>
                 {% for invitation in invited_sessions %}
-                    <a href="{{ invitation.get_absolute_url }}">{{ invitation }} - Details</a>
+                    <div class="row">
+                        <div class="col col-sm-4">
+                            <a href="{{ invitation.get_absolute_url }}">{{ invitation }}</a>
+                        </div>
+                        {% if has_player %}
+                            <div class="col col-sm-2">
+                                <a href="{% url 'take_session_part' invitation.id %}" class="btn btn-success"
+                                   role="button">Join</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 {% endfor %}
             {% else %}
                 {% if not participated_sessions %}

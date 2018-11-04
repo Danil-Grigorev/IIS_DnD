@@ -1,45 +1,40 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
 from .tests import *
 
-model_form_mapper = {
-    Player: CreatePlayer,
-    Session: CreateSession,
-    Character: CreateCharacter,
-    Enemy: CreateEnemy,
-    Adventure: CreateAdventure,
-    Campaign: CreateCampaign,
-    Inventory: CreateInventory,
-    Map: CreateMap
-}
-
 
 def home(request):
-    context = {'has_player': has_free_player(request.user)}
     if request.user.is_anonymous:
-        return render(request, 'home_pages/player_home.html', context)
-    elif request.user.profile.role == "Author":
+        return render(request, 'home_pages/player_home.html', {})
+
+    context = {
+        'has_player': has_free_player(request.user),
+        'players': Player.objects.filter(user=request.user.profile),
+    }
+    if request.user.profile.role == "Author":
+        context['campaigns'] = Campaign.objects.filter(author=request.user.profile)
         context['characters'] = Character.objects.filter(owner__user=request.user.profile)
-        context['players'] = Player.objects.filter(user=request.user.profile)
-        context['adventures'] = Adventure.objects.all()
-        context['campaigns'] = Campaign.objects.all()
-        context['sessions'] = Session.objects.all()
-        context['enemies'] = Enemy.objects.all()
-        context['maps'] = Map.objects.all()
-        context['items'] = Inventory.objects.all()
+        context['adventures'] = Adventure.objects.filter(author=request.user.profile)
+        context['enemies'] = Enemy.objects.filter(author=request.user.profile)
+        context['maps'] = Map.objects.filter(author=request.user.profile)
+        context['items'] = Inventory.objects.filter(author=request.user.profile)
 
         return render(request, 'home_pages/author_home.html', context)
     elif request.user.profile.role == "Session leader":
-
+        leaders = Player.objects.filter(user=request.user.profile)
+        context['sessions'] = Session.objects.filter(leader__in=leaders)
+        context['campaigns'] = Campaign.objects.exists()
         return render(request, 'home_pages/session_leader_home.html', context)
     elif request.user.profile.role == "Player":
-        context['participated_sessions'] = [p.session_part for p in
-                                            Player.objects.filter(session_part__in=Session.objects.all())]
-        context['invited_sessions'] = None
+        pl_part_sess = Player.objects.filter(user=request.user.profile).values_list('session_part')
+        part_sessions_l = Session.objects.filter(id__in=pl_part_sess)
+        context['participated_sessions'] = part_sessions_l
+        context['invited_sessions'] = Session.objects.exclude(id__in=part_sessions_l.values_list('id'))
 
         return render(request, 'home_pages/player_home.html', context)
     else:
@@ -55,145 +50,83 @@ def role_change(request, role):
 
 
 @login_required(login_url='/login/')
-def new_session(request):
+def participate_in_session(request, sess_id):
     if request.method == 'POST':
-        form = CreateSession(request.POST)
+        form = TakePartS(request.user.profile, sess_id, request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            messages.success(request, 'Session was created successfully.')
-            return redirect('home')
-    else:
-        form = CreateSession()
-    context = {
-        'title': 'Create session',
-        'form': form,
-        'name': 'New session',
-        'submit_name': 'Create session'
-    }
-    return render(request, 'create.html', context)
-
-
-# @user_passes_test(has_free_player, login_url='/home/')
-@login_required(login_url='/login/')
-def new_character(request):
-    if request.method == 'POST':
-        form = CreateCharacter(request.POST)
-        if form.is_valid():
-            f = form.save(commit=False)
-            f.save()
-            messages.success(request, 'Character was created successfully.')
-            return redirect('home')
+            form.save()
+            messages.success(request, 'Successfully joined session.')
+            return redirect(Session.objects.get(id=form.sess_id).get_participator_url())
         else:
-            messages.error(request, "Can't create character, invalid form detected")
+            messages.error(request, "Can't take part in session, invalid form detected")
     else:
-        form = CreateCharacter()
-        form.fields['owner'].queryset = Player.objects.filter(user=request.user)
-
+        form = TakePartS(request.user.profile, sess_id)
     context = {
-        'title': 'Create character',
+        'title': 'Session participation',
         'form': form,
-        'name': 'New character',
-        'submit_name': 'Add character'
+        'name': 'Choose session and player',
+        'submit_name': 'Start'
     }
-
-    return render(request, 'create.html', context)
-
-
-@login_required(login_url='/login/')
-def new_player(request):
-    if request.method == 'POST':
-        form = CreatePlayer(request.POST)
-        if form.is_valid():
-            f = form.save(commit=False)
-            f.user = request.user.profile
-            f.save()
-            messages.success(request, 'Player was created successfully.')
-            return redirect('home')
-        else:
-            messages.error(request, "Can't create player, invalid form detected")
-    else:
-        form = CreatePlayer()
-
-    context = {
-        'title': 'Create player',
-        'form': form,
-        'name': 'New player',
-        'submit_name': 'Add player'
-    }
-
-    return render(request, 'create.html', context)
-
-
-@login_required(login_url='/login/')
-def new_map(request):
-    if request.method == 'POST':
-        form = CreateMap(request.POST)
-        if form.is_valid():
-            f = form.save(commit=False)
-            f.author = request.user
-            f.save()
-            messages.success(request, 'Map was created successfully.')
-            return redirect('home')
-        else:
-            messages.error(request, "Can't create map, invalid form detected")
-    else:
-        form = CreateMap()
-
-    context = {
-        'title': 'Create map',
-        'form': form,
-        'name': 'New map',
-        'submit_name': 'Add map'
-    }
-    return render(request, 'create.html', context)
+    return render(request, 'forms/form_base.html', context)
 
 
 @login_required(login_url='/login')
-def details_campaign(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_campaign(request, id):
+    obj = get_object_or_404(Campaign, id=id)
     return render(request, 'detailed_views/details_campaign.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_map(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_map(request, id):
+    obj = get_object_or_404(Map, id=id)
     return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_player(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_player(request, id):
+    obj = get_object_or_404(Player, id=id)
     return render(request, 'detailed_views/details_player.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_character(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_character(request, id):
+    obj = get_object_or_404(Character, id=id)
     return render(request, 'detailed_views/details_character.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_session(request, id, model):
-    obj = get_object_or_404(model, id=id)
-    return render(request, 'detailed_views/details_session.html', {'obj_details': obj})
+def details_session(request, id):
+    sess = get_object_or_404(Session, id=id)
+    try:
+        participated_player = Player.objects.filter(session_part=sess).get(user=request.user.profile)
+    except ObjectDoesNotExist:
+        participated_player = None
+
+    is_author = sess.leader.user == request.user.profile
+
+    context = {
+        'participator': participated_player,
+        'is_creator': is_author,
+        'obj_details': sess,
+    }
+    return render(request, 'detailed_views/details_session.html', context)
 
 
 @login_required(login_url='/login')
-def details_enemy(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_enemy(request, id):
+    obj = get_object_or_404(Enemy, id=id)
     return render(request, 'detailed_views/details_enemy.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_adventure(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_adventure(request, id):
+    obj = get_object_or_404(Adventure, id=id)
     return render(request, 'detailed_views/details_adventure.html', {'obj_details': obj})
 
 
 @login_required(login_url='/login')
-def details_inventory(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def details_inventory(request, id):
+    obj = get_object_or_404(Inventory, id=id)
     return render(request, 'detailed_views/details_inventory.html', {'obj_details': obj})
 
 
@@ -205,46 +138,217 @@ def delete(request, id, model):
         obj.delete()
         messages.success(request, '{} was deleted.'.format(name))
         return redirect('home')
-    return render(request, 'delete.html', {'obj_details': obj})
+    return render(request, 'confirm_action.html', {'obj_details': obj, 'operation': 'delete'})
 
 
 @login_required(login_url='/home/')
-def edit(request, id, model):
-    obj = get_object_or_404(model, id=id)
+def leave_session(request, sess_id):
+    session = Session.objects.get(id=sess_id)
     if request.method == 'POST':
-        form = model_form_mapper[model](request.POST, instance=obj)
+        player = Player.objects.filter(user=request.user.profile).get(session_part=session)
+        player.session_part = None
+        player.save()
+        return redirect('home')
+    else:
+        return render(request, 'confirm_action.html', {'obj_details': session, 'operation': 'leave'})
+
+
+@login_required(login_url='/home/')
+def edit_player(request, id):
+    obj = get_object_or_404(Player, id=id)
+    if request.method == 'POST':
+        form = CreatePlayer(request.POST, instance=obj)
         if form.is_valid():
-            f = form.save()
+            form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
             return redirect('home')
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = model_form_mapper[model](instance=obj)
+        form = CreatePlayer(instance=obj)
 
     context = {
-        'title': 'Edit {}'.format(model.__name__.lower()),
+        'title': 'Edit player',
         'form': form,
-        'name': 'Edit {}'.format(model.__name__.lower()),
+        'name': 'Edit player',
         'submit_name': 'Submit changes'
     }
-    return render(request, 'create.html', context)
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_session(request, id):
+    obj = get_object_or_404(Session, id=id)
+    if request.method == 'POST':
+        form = CreateSession(request.user.profile, request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateSession(request.user.profile, instance=obj)
+
+    context = {
+        'title': 'Edit session',
+        'form': form,
+        'name': 'Edit session',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_character(request, id):
+    obj = get_object_or_404(Character, id=id)
+    if request.method == 'POST':
+        form = CreateCharacter(request.user.profile, request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateCharacter(request.user.profile, instance=obj)
+
+    context = {
+        'title': 'Edit character',
+        'form': form,
+        'name': 'Edit character',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_enemy(request, id):
+    obj = get_object_or_404(Enemy, id=id)
+    if request.method == 'POST':
+        form = CreateEnemy(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateEnemy(instance=obj)
+
+    context = {
+        'title': 'Edit enemy',
+        'form': form,
+        'name': 'Edit enemy',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_adventure(request, id):
+    obj = get_object_or_404(Adventure, id=id)
+    if request.method == 'POST':
+        form = CreateAdventure(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateAdventure(instance=obj)
+
+    context = {
+        'title': 'Edit adventure',
+        'form': form,
+        'name': 'Edit adventure',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_campaign(request, id):
+    obj = get_object_or_404(Campaign, id=id)
+    if request.method == 'POST':
+        form = CreateCampaign(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateCampaign(instance=obj)
+
+    context = {
+        'title': 'Edit campaign',
+        'form': form,
+        'name': 'Edit campaign',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_inventory(request, id):
+    obj = get_object_or_404(Inventory, id=id)
+    if request.method == 'POST':
+        form = CreateInventory(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateInventory(instance=obj)
+
+    context = {
+        'title': 'Edit inventory',
+        'form': form,
+        'name': 'Edit inventry',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/home/')
+def edit_map(request, id):
+    obj = get_object_or_404(Map, id=id)
+    if request.method == 'POST':
+        form = CreateMap(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = CreateMap(instance=obj)
+
+    context = {
+        'title': 'Edit map',
+        'form': form,
+        'name': 'Edit map',
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'forms/form_base.html', context)
 
 
 @login_required(login_url='/login/')
 def new_enemy(request):
     if request.method == 'POST':
-        form = CreateEnemy(request.POST)
+        form = CreateEnemy(request.user.profile, request.POST)
         if form.is_valid():
-            f = form.save(commit=False)
-            f.author = request.user
-            f.save()
+            form.save()
             messages.success(request, 'Enemy was created successfully.')
             return redirect('home')
         else:
             messages.error(request, "Can't create enemy, invalid form detected")
     else:
-        form = CreateEnemy()
+        form = CreateEnemy(request.user.profile)
 
     context = {
         'title': 'Create enemy',
@@ -252,25 +356,21 @@ def new_enemy(request):
         'name': 'New enemy',
         'submit_name': 'Add enemy'
     }
-    return render(request, 'create.html', context)
-
-
-Campaign
+    return render(request, 'forms/form_base.html', context)
 
 
 @login_required(login_url='/login/')
 def new_adventure(request):
     if request.method == 'POST':
-        form = CreateAdventure(request.POST)
+        form = CreateAdventure(request.user.profile, request.POST)
         if form.is_valid():
-            f = form.save(commit=False)
-            f.save()
+            form.save()
             messages.success(request, 'Adventure was created successfully.')
             return redirect('home')
         else:
             messages.error(request, "Can't create adventure, invalid form detected")
     else:
-        form = CreateAdventure()
+        form = CreateAdventure(request.user.profile)
 
     context = {
         'title': 'Create adventure',
@@ -278,22 +378,21 @@ def new_adventure(request):
         'name': 'New adventure',
         'submit_name': 'Add adventure'
     }
-    return render(request, 'create.html', context)
+    return render(request, 'forms/form_base.html', context)
 
 
 @login_required(login_url='/login/')
 def new_campaign(request):
     if request.method == 'POST':
-        form = CreateCampaign(request.POST)
+        form = CreateCampaign(request.user.profile, request.POST)
         if form.is_valid():
-            f = form.save(commit=False)
-            f.save()
+            form.save()
             messages.success(request, 'Campaign was created successfully.')
             return redirect('home')
         else:
             messages.error(request, "Can't create campaign, invalid form detected")
     else:
-        form = CreateCampaign()
+        form = CreateCampaign(request.user.profile)
 
     context = {
         'title': 'Create campaign',
@@ -301,23 +400,21 @@ def new_campaign(request):
         'name': 'New campaign',
         'submit_name': 'Add campaign'
     }
-    return render(request, 'create.html', context)
+    return render(request, 'forms/form_base.html', context)
 
 
 @login_required(login_url='/login/')
 def new_inventory(request):
     if request.method == 'POST':
-        form = CreateInventory(request.POST)
+        form = CreateInventory(request.user.profile, request.POST)
         if form.is_valid():
-            f = form.save(commit=False)
-            f.owner = None
-            f.save()
+            form.save()
             messages.success(request, 'Item was created successfully.')
             return redirect('home')
         else:
             messages.error(request, "Can't create item, invalid form detected")
     else:
-        form = CreateInventory()
+        form = CreateInventory(request.user.profile)
 
     context = {
         'title': 'Create item',
@@ -325,4 +422,94 @@ def new_inventory(request):
         'name': 'New item',
         'submit_name': 'Add item'
     }
-    return render(request, 'create.html', context)
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/login/')
+def new_session(request):
+    if request.method == 'POST':
+        form = CreateSession(request.user.profile, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Session was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create session, invalid form detected")
+    else:
+        form = CreateSession(request.user.profile)
+    context = {
+        'title': 'Create session',
+        'form': form,
+        'name': 'New session',
+        'submit_name': 'Create session'
+    }
+    return render(request, 'forms/form_base.html', context)
+
+
+# @user_passes_test(has_free_player, login_url='/home/')
+@login_required(login_url='/login/')
+def new_character(request):
+    if request.method == 'POST':
+        form = CreateCharacter(request.user.profile, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Character was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create character, invalid form detected")
+    else:
+        form = CreateCharacter(request.user.profile)
+
+    context = {
+        'title': 'Create character',
+        'form': form,
+        'name': 'New character',
+        'submit_name': 'Add character'
+    }
+
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/login/')
+def new_player(request):
+    if request.method == 'POST':
+        form = CreatePlayer(request.user.profile, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Player was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create player, invalid form detected")
+    else:
+        form = CreatePlayer(request.user.profile)
+
+    context = {
+        'title': 'Create player',
+        'form': form,
+        'name': 'New player',
+        'submit_name': 'Add player'
+    }
+
+    return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/login/')
+def new_map(request):
+    if request.method == 'POST':
+        form = CreateMap(request.user.profile, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Map was created successfully.')
+            return redirect('home')
+        else:
+            messages.error(request, "Can't create map, invalid form detected")
+    else:
+        form = CreateMap(request.user.profile)
+
+    context = {
+        'title': 'Create map',
+        'form': form,
+        'name': 'New map',
+        'submit_name': 'Add map'
+    }
+    return render(request, 'forms/form_base.html', context)

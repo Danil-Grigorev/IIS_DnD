@@ -3,17 +3,48 @@ from django import forms
 from .models import *
 
 
+class TakePartS(forms.Form):
+    class Meta:
+        fields = ('session', 'player')
+
+    def __init__(self, profile, sess_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sess_id = sess_id
+        self.fields['player'] = forms.ModelChoiceField(
+            queryset=Player.objects.filter(user=profile).filter(session_part=None),
+            widget=forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose session"})
+        )
+
+    def save(self):
+        data = self.cleaned_data
+        player = data['player']
+        player.session_part = Session.objects.get(id=self.sess_id)
+        player.save()
+
+
 class CreateSession(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['leader'].queryset = Player.objects.filter(user=profile)
+
     class Meta:
         model = Session
         widgets = {
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter location"}),
-            'campaign': forms.Select(attrs={'class': 'form-control', 'placeholder': "Enter location"})
+            'campaign': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose campaign"}),
+            'leader': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose creator"})
+
         }
-        fields = ['location', 'campaign']
+        fields = ['location', 'campaign', 'leader']
 
 
 class CreateCharacter(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['owner'].queryset = Player.objects.filter(user=profile)
+
     class Meta:
         model = Character
         widgets = {
@@ -26,6 +57,11 @@ class CreateCharacter(forms.ModelForm):
 
 
 class CreatePlayer(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Player
         widgets = {
@@ -33,8 +69,18 @@ class CreatePlayer(forms.ModelForm):
         }
         fields = ['nickname']
 
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.user = self.profile
+        super().save()
+
 
 class CreateMap(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Map
         widgets = {
@@ -43,8 +89,18 @@ class CreateMap(forms.ModelForm):
         }
         fields = ['name', 'description']
 
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        super().save()
+
 
 class CreateEnemy(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Enemy
         widgets = {
@@ -53,8 +109,18 @@ class CreateEnemy(forms.ModelForm):
         }
         fields = ['name', 'type']
 
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        super().save()
+
 
 class CreateAdventure(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Adventure
         widgets = {
@@ -68,8 +134,18 @@ class CreateAdventure(forms.ModelForm):
         }
         fields = ['name', 'difficulty', 'purpose', 'location', 'map', 'enemies']
 
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        super().save()
+
 
 class CreateCampaign(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Campaign
         widgets = {
@@ -79,8 +155,18 @@ class CreateCampaign(forms.ModelForm):
         }
         fields = ['name', 'info', 'adventures']
 
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        super().save()
+
 
 class CreateInventory(forms.ModelForm):
+
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+
     class Meta:
         model = Inventory
         widgets = {
@@ -88,3 +174,9 @@ class CreateInventory(forms.ModelForm):
             'type': forms.Select(attrs={'class': 'form-control'}),
         }
         fields = ['name', 'type', ]
+
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        s.owner = None
+        super().save()
