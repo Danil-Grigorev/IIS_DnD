@@ -1,0 +1,33 @@
+{% extends 'home_pages/home.html' %}
+
+{% block title %}Session leader home{% endblock %}
+
+{% block sidenav %}
+    <div class="sidenav">
+        {% if has_player %}
+            <button class="dropdown-btn">Sessions
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-container">
+                {% for session in sessions %}
+                    <a href="{{ session.get_absolute_url }}">{{ session }}</a>
+                {% endfor %}
+                <a href="{% url 'new_session' %}">Start new session</a>
+            </div>
+        {% else %}
+            <
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block main_view %}
+    <div class="container-fluid">
+        {% if has_player %}
+
+        {% else %}
+            <h3>You have not created any player yet. Switch role to author to create one?</h3>
+            <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
+        {% endif %}
+    </div>
+{% endblock %}
+

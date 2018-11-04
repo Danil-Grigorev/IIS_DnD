@@ -1,0 +1,44 @@
+{% extends 'home_pages/home.html' %}
+
+{% block title %}Player home{% endblock %}
+
+{% block sidenav %}
+    <div class="sidenav">
+        {% if has_player %}
+            <button class="dropdown-btn">Joined sessions
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-container">
+                {% for session in sessions %}
+                    <a href="{{ session.get_absolute_url }}">{{ session }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+
+{% block main_view %}
+    <div class="container-fluid">
+        {% if has_player %}
+            {% if participated_sessions %}
+                {% for part in participated_sessions %}
+                    <a href="{{ part.get_participator_url }}">{{ invitation }} - Open</a>
+                {% endfor %}
+            {% endif %}
+            {% if invited_sessions %}
+                <h3>Sessions:</h3>
+                {% for invitation in invited_sessions %}
+                    <a href="{{ invitation.get_absolute_url }}">{{ invitation }} - Details</a>
+                {% endfor %}
+            {% else %}
+                {% if not participated_sessions %}
+                    <h3>You are not invited in any session yet</h3>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <h3>You have not created any player yet. Switch role to author to create one?</h3>
+            <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -6,6 +6,11 @@ from .models import *
 urlpatterns = [
     path('home/', views.home, name='home'),
     path('', views.home, name='home'),
+
+    path('change_role/player', views.role_change, {'role': 'Player'}, name='role_player'),
+    path('change_role/author', views.role_change, {'role': 'Author'}, name='role_author'),
+    path('change_role/session_leader', views.role_change, {'role': 'Session leader'}, name='role_session_leader'),
+
     path('new_session/', views.new_session, name='new_session'),
     path('new_character/', views.new_character, name='new_character'),
     path('new_player/', views.new_player, name='new_player'),

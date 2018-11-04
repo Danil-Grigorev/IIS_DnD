@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import *
@@ -18,20 +19,39 @@ model_form_mapper = {
 
 
 def home(request):
+    context = {'has_player': has_free_player(request.user)}
     if request.user.is_anonymous:
-        context = {}
+        return render(request, 'home_pages/player_home.html', context)
+    elif request.user.profile.role == "Author":
+        context['characters'] = Character.objects.filter(owner__user=request.user.profile)
+        context['players'] = Player.objects.filter(user=request.user.profile)
+        context['adventures'] = Adventure.objects.all()
+        context['campaigns'] = Campaign.objects.all()
+        context['sessions'] = Session.objects.all()
+        context['enemies'] = Enemy.objects.all()
+        context['maps'] = Map.objects.all()
+        context['items'] = Inventory.objects.all()
+
+        return render(request, 'home_pages/author_home.html', context)
+    elif request.user.profile.role == "Session leader":
+
+        return render(request, 'home_pages/session_leader_home.html', context)
+    elif request.user.profile.role == "Player":
+        context['participated_sessions'] = [p.session_part for p in
+                                            Player.objects.filter(session_part__in=Session.objects.all())]
+        context['invited_sessions'] = None
+
+        return render(request, 'home_pages/player_home.html', context)
     else:
-        context = {
-            'characters': Character.objects.filter(owner__user=request.user),
-            'adventures': Adventure.objects.all(),
-            'campaigns': Campaign.objects.all(),
-            'sessions': Session.objects.all(),
-            'enemies': Enemy.objects.all(),
-            'maps': Map.objects.all(),
-            'items': Inventory.objects.all(),
-            'has_player': has_free_player(request.user),
-        }
-    return render(request, 'home.html', context)
+        return HttpResponseNotFound('<h1>Unknown role detected</h1>')
+
+
+@login_required(login_url='/login/')
+def role_change(request, role):
+    user = get_object_or_404(User, id=request.user.id)
+    user.profile.role = role
+    user.profile.save()
+    return redirect('home')
 
 
 @login_required(login_url='/login/')
@@ -86,7 +106,7 @@ def new_player(request):
         form = CreatePlayer(request.POST)
         if form.is_valid():
             f = form.save(commit=False)
-            f.user = request.user
+            f.user = request.user.profile
             f.save()
             messages.success(request, 'Player was created successfully.')
             return redirect('home')
@@ -209,7 +229,6 @@ def edit(request, id, model):
         'submit_name': 'Submit changes'
     }
     return render(request, 'create.html', context)
-
 
 
 @login_required(login_url='/login/')

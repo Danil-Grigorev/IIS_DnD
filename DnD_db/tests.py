@@ -8,5 +8,5 @@ from .models import *
 def has_free_player(user):
     if isinstance(user, AnonymousUser):
         return False
-    p_list = Player.objects.filter(user=user)
+    p_list = Player.objects.filter(user=user.profile)
     return any([not p.session_part for p in p_list])

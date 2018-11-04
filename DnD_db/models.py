@@ -1,11 +1,37 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.shortcuts import reverse
 from django.utils.timezone import now
 
 
+class Profile(models.Model):
+    PL = 'Player'
+    AU = 'Author'
+    PJ = 'Session leader'
+    roles = ((PL, PL), (AU, AU), (PJ, PJ))
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
+    role = models.CharField(max_length=14, blank=False, null=False, choices=roles, default=PL)
+    invitations = models.ManyToManyField('Session', through='Player', blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+@receiver(post_save, sender=User)
+def set_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_profile(sender, instance, **kwargs):
+    instance.profile.save()
+
+
 class Player(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, blank=False, default='new player', unique=True)
     session_part = models.OneToOneField('Session', on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -23,10 +49,13 @@ class Session(models.Model):
     campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
 
     def __str__(self):
-        return "{}: {}".format(self.pk, self.location)
+        return '{}'.format(self.location)
 
     def get_absolute_url(self):
         return reverse('detailed_session', kwargs={'id': self.id})
+
+    def get_participator_url(self):
+        return self.get_absolute_url()
 
 
 class Character(models.Model):
