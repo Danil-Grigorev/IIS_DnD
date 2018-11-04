@@ -28,8 +28,17 @@ urlpatterns = [
     path('player_details/<int:id>/delete', views.delete, {'model': Player}, name='delete_player'),
     path('character_details/<int:id>/delete', views.delete, {'model': Character}, name='delete_character'),
     path('session_details/<int:id>/delete', views.delete, {'model': Session}, name='delete_session'),
-    path('enemy_details/<int:id/delete>', views.delete, {'model': Enemy}, name='delete_enemy'),
-    path('adventure_details/<int:id/delete>', views.delete, {'model': Adventure}, name='delete_adventure'),
+    path('enemy_details/<int:id>/delete', views.delete, {'model': Enemy}, name='delete_enemy'),
+    path('adventure_details/<int:id>/delete', views.delete, {'model': Adventure}, name='delete_adventure'),
     path('inventory_details/<int:id>/delete', views.delete, {'model': Inventory}, name='delete_inventory'),
     path('campaign_details/<int:id>/delete', views.delete, {'model': Campaign}, name='delete_campaign'),
+
+    path('map_details/<int:id>/edit', views.edit, {'model': Map}, name='edit_map'),
+    path('player_details/<int:id>/edit', views.edit, {'model': Player}, name='edit_player'),
+    path('character_details/<int:id>/edit', views.edit, {'model': Character}, name='edit_character'),
+    path('session_details/<int:id>/edit', views.edit, {'model': Session}, name='edit_session'),
+    path('enemy_details/<int:id>/edit', views.edit, {'model': Enemy}, name='edit_enemy'),
+    path('adventure_details/<int:id>/edit', views.edit, {'model': Adventure}, name='edit_adventure'),
+    path('inventory_details/<int:id>/edit', views.edit, {'model': Inventory}, name='edit_inventory'),
+    path('campaign_details/<int:id>/edit', views.edit, {'model': Campaign}, name='edit_campaign')
 ]

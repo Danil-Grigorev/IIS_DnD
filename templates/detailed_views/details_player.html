@@ -5,4 +5,8 @@
     <p>User: {{ obj_details.user }}</p>
     <p>Nickname: {{ obj_details.nickname }}</p>
     <p>Session_part: {{ obj_details.session_part }}</p>
+
+    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+    <a href="{% url 'delete_player' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+    <a href="{% url 'edit_player' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
 {% endblock %}

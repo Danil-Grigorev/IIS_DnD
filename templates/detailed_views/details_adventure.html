@@ -9,5 +9,6 @@
     <p>Map: {{ obj_details.map }}</p>
     <p>Enemies: {{ obj_details.enemies }}</p>
     <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
-    <a href="{% url 'delete_character' obj_details.id %}" class="btn btn-default">Remove</a>
+    <a href="{% url 'delete_character' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+    <a href="{% url 'edit_adventure' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
 {% endblock %}

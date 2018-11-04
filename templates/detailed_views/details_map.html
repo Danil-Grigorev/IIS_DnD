@@ -5,4 +5,8 @@
     <p>Name: {{ obj_details.name }}</p>
     <p>Author: {{ obj_details.author }}</p>
     <p>Description: {{ obj_details.description }}</p>
+
+    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+    <a href="{% url 'delete_map' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+    <a href="{% url 'edit_map' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
 {% endblock %}

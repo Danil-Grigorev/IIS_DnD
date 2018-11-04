@@ -5,6 +5,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from .tests import *
 
+model_form_mapper = {
+    Player: CreatePlayer,
+    Session: CreateSession,
+    Character: CreateCharacter,
+    Enemy: CreateEnemy,
+    Adventure: CreateAdventure,
+    Campaign: CreateCampaign,
+    Inventory: CreateInventory,
+    Map: CreateMap
+}
+
 
 def home(request):
     if request.user.is_anonymous:
@@ -175,6 +186,30 @@ def delete(request, id, model):
         messages.success(request, '{} was deleted.'.format(name))
         return redirect('home')
     return render(request, 'delete.html', {'obj_details': obj})
+
+
+@login_required(login_url='/home/')
+def edit(request, id, model):
+    obj = get_object_or_404(model, id=id)
+    if request.method == 'POST':
+        form = model_form_mapper[model](request.POST, instance=obj)
+        if form.is_valid():
+            f = form.save()
+            messages.success(request, "'{}' was updated successfully.".format(obj))
+            return redirect('home')
+        else:
+            messages.error(request, "Can't update '{}', invalid form detected".format(obj))
+    else:
+        form = model_form_mapper[model](instance=obj)
+
+    context = {
+        'title': 'Edit {}'.format(model.__name__.lower()),
+        'form': form,
+        'name': 'Edit {}'.format(model.__name__.lower()),
+        'submit_name': 'Submit changes'
+    }
+    return render(request, 'create.html', context)
+
 
 
 @login_required(login_url='/login/')

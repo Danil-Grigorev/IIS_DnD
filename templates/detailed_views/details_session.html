@@ -6,6 +6,8 @@
     <p>Creation_date: {{ obj_details.creation_date }}</p>
     <p>Creator: {{ obj_details.creator }}</p>
     <p>Campaign: {{ obj_details.campaign }}</p>
+
     <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
-    <input class="btn btn-confirm" type="submit" value="Remove">
+    <a href="{% url 'delete_session' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+    <a href="{% url 'edit_session' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
 {% endblock %}

@@ -5,4 +5,8 @@
     <p>Name: {{ obj_details.name }}</p>
     <p>Type: {{ obj_details.type }}</p>
     <p>Owner: {{ obj_details.owner }}</p>
+
+    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+    <a href="{% url 'delete_inventory' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
+    <a href="{% url 'edit_inventory' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
 {% endblock %}

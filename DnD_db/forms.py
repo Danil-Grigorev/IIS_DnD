@@ -49,7 +49,7 @@ class CreateEnemy(forms.ModelForm):
         model = Enemy
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy name'}),
-            'type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
+            'type': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Enemy description'}),
         }
         fields = ['name', 'type']
 
