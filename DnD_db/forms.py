@@ -1,6 +1,7 @@
 from django import forms
 
 from .models import *
+from .tests import get_free_players
 
 
 class TakePartS(forms.Form):
@@ -11,7 +12,7 @@ class TakePartS(forms.Form):
         super().__init__(*args, **kwargs)
         self.sess_id = sess_id
         self.fields['player'] = forms.ModelChoiceField(
-            queryset=Player.objects.filter(user=profile).filter(session_part=None),
+            queryset=get_free_players(profile),
             widget=forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose session"})
         )
 
@@ -20,6 +21,27 @@ class TakePartS(forms.Form):
         player = data['player']
         player.session_part = Session.objects.get(id=self.sess_id)
         player.save()
+
+
+class CreateMessage(forms.ModelForm):
+    def __init__(self, profile, sess, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+        self.sess = sess
+
+    class Meta:
+        model = Message
+        widgets = {
+            'text': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter message"}),
+            'type': forms.Select(attrs={'class': 'form-control', 'placeholder': "Select type"})
+        }
+        fields = ['text', 'type']
+
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.author = self.profile
+        s.session = self.sess
+        super().save(commit)
 
 
 class CreateSession(forms.ModelForm):
@@ -31,12 +53,12 @@ class CreateSession(forms.ModelForm):
     class Meta:
         model = Session
         widgets = {
-            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter location"}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter title"}),
             'campaign': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose campaign"}),
             'leader': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose creator"})
 
         }
-        fields = ['location', 'campaign', 'leader']
+        fields = ['title', 'campaign', 'leader']
 
 
 class CreateCharacter(forms.ModelForm):

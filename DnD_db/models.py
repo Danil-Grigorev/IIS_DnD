@@ -6,6 +6,26 @@ from django.shortcuts import reverse
 from django.utils.timezone import now
 
 
+class Message(models.Model):
+    TA = 'Task'
+    AC = 'Action'
+    CO = 'Comment'
+    TYPES = ((AC, AC), (CO, CO), (TA, TA))
+
+    text = models.TextField()
+    type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=AC)
+    date_posted = models.DateTimeField(default=now)
+    author = models.ForeignKey('Profile', on_delete=models.PROTECT, blank=False, null=True)
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
+
+    class Meta:
+        ordering = ['date_posted']
+
+    def __str__(self):
+        text = self.text[:20] + '...' if len(self.text) > 20 else self.text
+        return '{} - {}'.format(self.author, text, self.date_posted)
+
+
 class Profile(models.Model):
     PL = 'Player'
     AU = 'Author'
@@ -33,7 +53,7 @@ def save_profile(sender, instance, **kwargs):
 class Player(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, blank=False, default='new player', unique=True)
-    session_part = models.OneToOneField('Session', on_delete=models.SET_NULL, blank=True, null=True)
+    session_part = models.ForeignKey('Session', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.nickname
@@ -43,19 +63,19 @@ class Player(models.Model):
 
 
 class Session(models.Model):
-    location = models.CharField(max_length=100, blank=False, default='Location for session', unique=True)
+    title = models.CharField(max_length=100, blank=False, default='Title for session', unique=True)
     creation_date = models.DateTimeField(default=now)
-    leader = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
+    leader = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
     campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
 
     def __str__(self):
-        return '{}'.format(self.location)
+        return '{}'.format(self.title)
 
     def get_absolute_url(self):
         return reverse('detailed_session', kwargs={'id': self.id})
 
     def get_participator_url(self):
-        return self.get_absolute_url()
+        return reverse('view_session', kwargs={'sess_id': self.id})
 
 
 class Character(models.Model):

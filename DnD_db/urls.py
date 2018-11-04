@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('take_session_part/<int:sess_id>/', views.participate_in_session, name='take_session_part'),
     path('leave_session/<int:sess_id>/', views.leave_session, name='leave_session'),
+    path('view_session/<int:sess_id>/', views.session_view, name='view_session'),
 
     path('new_session/', views.new_session, name='new_session'),
     path('new_character/', views.new_character, name='new_character'),

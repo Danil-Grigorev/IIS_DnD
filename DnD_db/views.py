@@ -27,7 +27,7 @@ def home(request):
         return render(request, 'home_pages/author_home.html', context)
     elif request.user.profile.role == "Session leader":
         leaders = Player.objects.filter(user=request.user.profile)
-        context['sessions'] = Session.objects.filter(leader__in=leaders)
+        context['leaded_sessions'] = Session.objects.filter(leader__in=leaders)
         context['campaigns'] = Campaign.objects.exists()
         return render(request, 'home_pages/session_leader_home.html', context)
     elif request.user.profile.role == "Player":
@@ -68,6 +68,22 @@ def participate_in_session(request, sess_id):
         'submit_name': 'Start'
     }
     return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/login/')
+def session_view(request, sess_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    if request.method == 'POST':
+        form = CreateMessage(request.user.profile, sess, request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = CreateMessage(request.user.profile, sess, request.POST)
+    context = {
+        'messages': Message.objects.filter(session=sess),
+        'form': form,
+    }
+    return render(request, 'in_session_view.html', context)
 
 
 @login_required(login_url='/login')
@@ -157,7 +173,7 @@ def leave_session(request, sess_id):
 def edit_player(request, id):
     obj = get_object_or_404(Player, id=id)
     if request.method == 'POST':
-        form = CreatePlayer(request.POST, instance=obj)
+        form = CreatePlayer(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -165,7 +181,7 @@ def edit_player(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreatePlayer(instance=obj)
+        form = CreatePlayer(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit player',
@@ -226,7 +242,7 @@ def edit_character(request, id):
 def edit_enemy(request, id):
     obj = get_object_or_404(Enemy, id=id)
     if request.method == 'POST':
-        form = CreateEnemy(request.POST, instance=obj)
+        form = CreateEnemy(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -234,7 +250,7 @@ def edit_enemy(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreateEnemy(instance=obj)
+        form = CreateEnemy(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit enemy',
@@ -249,7 +265,7 @@ def edit_enemy(request, id):
 def edit_adventure(request, id):
     obj = get_object_or_404(Adventure, id=id)
     if request.method == 'POST':
-        form = CreateAdventure(request.POST, instance=obj)
+        form = CreateAdventure(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -257,7 +273,7 @@ def edit_adventure(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreateAdventure(instance=obj)
+        form = CreateAdventure(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit adventure',
@@ -272,7 +288,7 @@ def edit_adventure(request, id):
 def edit_campaign(request, id):
     obj = get_object_or_404(Campaign, id=id)
     if request.method == 'POST':
-        form = CreateCampaign(request.POST, instance=obj)
+        form = CreateCampaign(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -280,7 +296,7 @@ def edit_campaign(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreateCampaign(instance=obj)
+        form = CreateCampaign(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit campaign',
@@ -295,7 +311,7 @@ def edit_campaign(request, id):
 def edit_inventory(request, id):
     obj = get_object_or_404(Inventory, id=id)
     if request.method == 'POST':
-        form = CreateInventory(request.POST, instance=obj)
+        form = CreateInventory(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -303,7 +319,7 @@ def edit_inventory(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreateInventory(instance=obj)
+        form = CreateInventory(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit inventory',
@@ -318,7 +334,7 @@ def edit_inventory(request, id):
 def edit_map(request, id):
     obj = get_object_or_404(Map, id=id)
     if request.method == 'POST':
-        form = CreateMap(request.POST, instance=obj)
+        form = CreateMap(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
@@ -326,7 +342,7 @@ def edit_map(request, id):
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
-        form = CreateMap(instance=obj)
+        form = CreateMap(request.user.profile, instance=obj)
 
     context = {
         'title': 'Edit map',

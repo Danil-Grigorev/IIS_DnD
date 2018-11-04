@@ -2,22 +2,6 @@
 
 {% block title %}Session leader home{% endblock %}
 
-{% block sidenav %}
-    <div class="sidenav">
-        {% if has_player and campaigns %}
-            <button class="dropdown-btn">Sessions
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-container">
-                {% for session in sessions %}
-                    <a href="{{ session.get_absolute_url }}">{{ session }}</a>
-                {% endfor %}
-                <a href="{% url 'new_session' %}">Start new session</a>
-            </div>
-        {% endif %}
-    </div>
-{% endblock %}
-
 {% block main_view %}
     <div class="container-fluid">
         {% if not has_player %}
@@ -28,9 +12,16 @@
             <p>There is no campaign created yet. Switch role to author to create one?</p>
             <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
         {% else %}
-            {% for p in players %}
-                <p>Hey {{ p }}</p>
-            {% endfor %}
+
+        {% endif %}
+        {% if leaded_sessions %}
+            <h5>Leaded sessions:</h5>
+        {% endif %}
+        {% for sess in leaded_sessions %}
+            <a href="{{ sess.get_absolute_url }}">{{ sess }}</a>
+        {% endfor %}
+        {% if has_player and campaigns %}
+            <a href="{% url 'new_session' %}">Start new session</a>
         {% endif %}
     </div>
 {% endblock %}
