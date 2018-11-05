@@ -39,7 +39,8 @@ class CreateMessage(forms.ModelForm):
 
     def save(self, commit=True):
         s = super().save(commit=False)
-        s.author = self.profile
+        player = Player.objects.filter(user=self.profile).filter(session_part=self.sess)[0]
+        s.author = player
         s.session = self.sess
         super().save(commit)
 

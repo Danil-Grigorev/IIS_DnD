@@ -6,23 +6,23 @@
     <div class="container-fluid">
         <div class="scrollable">
             {% for m in participator_chat %}
-                <p>{{ m }}</p>
                 <div class="row"><span class="border"><div class="col-sm">
-                    {% if viewer == m.author %}
-                        <blockquote class="blockquote text-right"
+                    {% if m.author == viewer %}
+                        <blockquote class="blockquote text-right">
                     {% else %}
                         <blockquote class="blockquote text-left">
                     {% endif %}
                     {% if m.type == "Comment" %}
                         <p class="text-muted">
-                        {% elif m.type == "Task" %}
+                    {% elif m.type == "Task" %}
                         <p class="text-primary">
-                        {% elif m.type == "Action" %}
+                    {% elif m.type == "Action" %}
                         <p class="text-success">
-                        {% else %}
-                            </p>
+                    {% else %}
+                        <p>
                     {% endif %}
                     {{ m.text }}
+                    </p>
                         <footer>{{ m.date_posted }} - <cite
                                 title="Source Title">{{ m.author }}</cite></footer>
                     </blockquote>

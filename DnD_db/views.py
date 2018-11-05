@@ -81,7 +81,7 @@ def session_view(request, sess_id):
     context = {
         'participator_chat': Message.objects.filter(session=sess),
         'form': form,
-        'viewer': Player.objects.filter(user=request.user.profile).values_list('nickname'),
+        'viewer': Player.objects.filter(user=request.user.profile).filter(session_part=sess)[0],
     }
     return render(request, 'in_session_view.html', context)
 

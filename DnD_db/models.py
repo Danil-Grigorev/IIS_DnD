@@ -15,7 +15,7 @@ class Message(models.Model):
     text = models.TextField()
     type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=AC)
     date_posted = models.DateTimeField(default=now)
-    author = models.ForeignKey('Profile', on_delete=models.PROTECT, blank=False, null=True)
+    author = models.ForeignKey('Player', on_delete=models.PROTECT, blank=False, null=True)
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
 
     class Meta:
