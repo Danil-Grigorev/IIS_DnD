@@ -1,8 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseNotFound
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 
 from .forms import *
 from .tests import *
@@ -18,7 +17,7 @@ def home(request):
     }
     if request.user.profile.role == "Author":
         context['campaigns'] = Campaign.objects.filter(author=request.user.profile)
-        context['characters'] = Character.objects.filter(owner__user=request.user.profile)
+        context['characters'] = Character.objects.filter(author__user=request.user.profile)
         context['adventures'] = Adventure.objects.filter(author=request.user.profile)
         context['enemies'] = Enemy.objects.filter(author=request.user.profile)
         context['maps'] = Map.objects.filter(author=request.user.profile)
@@ -27,7 +26,7 @@ def home(request):
         return render(request, 'home_pages/author_home.html', context)
     elif request.user.profile.role == "Session leader":
         leaders = Player.objects.filter(user=request.user.profile)
-        context['leaded_sessions'] = Session.objects.filter(leader__in=leaders)
+        context['leaded_sessions'] = Session.objects.filter(author__in=leaders)
         context['campaigns'] = Campaign.objects.exists()
         return render(request, 'home_pages/session_leader_home.html', context)
     elif request.user.profile.role == "Player":
@@ -147,6 +146,7 @@ def details_inventory(request, id):
 
 
 @login_required(login_url='/home/')
+@can_delete_object
 def delete(request, id, model):
     obj = get_object_or_404(model, id=id)
     if request.method == 'POST':

@@ -48,24 +48,25 @@ class CreateSession(forms.ModelForm):
 
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['leader'].queryset = Player.objects.filter(user=profile)
+        self.fields['author'].queryset = Player.objects.filter(user=profile)
 
     class Meta:
         model = Session
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Enter title"}),
             'campaign': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose campaign"}),
-            'leader': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose creator"})
+            'author': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose creator"})
 
         }
-        fields = ['title', 'campaign', 'leader']
+        fields = ['title', 'campaign', 'author']
+        labels = {'author': 'leader'}
 
 
 class CreateCharacter(forms.ModelForm):
 
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['owner'].queryset = Player.objects.filter(user=profile)
+        self.fields['author'].queryset = Player.objects.filter(user=profile)
 
     class Meta:
         model = Character
@@ -73,9 +74,10 @@ class CreateCharacter(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Character name'}),
             'race': forms.Select(attrs={'class': 'form-control'}),
             'speciality': forms.Select(attrs={'class': 'form-control'}),
-            'owner': forms.Select(attrs={'class': 'form-control'})
+            'author': forms.Select(attrs={'class': 'form-control'})
         }
-        fields = ['name', 'race', 'speciality', 'owner']
+        fields = ['name', 'race', 'speciality', 'author']
+        labels = {'author': 'related player'}
 
 
 class CreatePlayer(forms.ModelForm):

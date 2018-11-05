@@ -65,7 +65,7 @@ class Player(models.Model):
 class Session(models.Model):
     title = models.CharField(max_length=100, blank=False, default='Title for session', unique=True)
     creation_date = models.DateTimeField(default=now)
-    leader = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
+    author = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
     campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
 
     def __str__(self):
@@ -133,7 +133,7 @@ class Character(models.Model):
     race = models.CharField(max_length=6, choices=RACES, default=HM)
     speciality = models.CharField(max_length=9, choices=SPECS, default=WA)
     level = models.IntegerField(default=1)
-    owner = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
+    author = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
     death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):

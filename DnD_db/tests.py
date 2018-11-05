@@ -1,4 +1,6 @@
 from django.contrib.auth.models import AnonymousUser
+from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
 
 from .models import *
 
@@ -13,5 +15,27 @@ def has_free_player(user):
 
 def get_free_players(profile):
     p_list = Player.objects.filter(user=profile)
-    session_leaders = Session.objects.filter(leader_id__in=p_list.values_list('id')).values_list('id')
+    session_leaders = Session.objects.filter(author_id__in=p_list.values_list('id')).values_list('id')
     return p_list.exclude(id__in=session_leaders)  # Exclude session leaders
+
+
+def can_delete_object(func):
+    """
+    Tests if current user can delete object, by comparison with object author
+    :param func: wrapped
+    :return: wrapped function or error
+    """
+
+    def wrapper(*args, **kwargs):
+        profile = args[0].user.profile
+        obj = get_object_or_404(kwargs['model'], id=kwargs['id'])
+        if "author_id" in obj.__dict__.keys():
+            owner_player = Player.objects.get(id=obj.author_id)
+        else:
+            owner_player = obj  # Object is Player model instance
+        print(owner_player.user_id, profile.id)
+        if owner_player.user_id != profile.id:
+            return HttpResponseNotFound("<h1>You have no permission to do that</h1>")
+        return func(*args, **kwargs)
+
+    return wrapper
