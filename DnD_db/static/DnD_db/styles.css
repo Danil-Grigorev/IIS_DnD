@@ -14,9 +14,26 @@ body {
     border-radius: 0 15px 0 0;
 }
 
-.col {
+.row {
     margin-bottom: 5px;
     margin-top: 5px;
+}
+
+.scrollable {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: fixed;
+    width: 60%;
+    height: 70%;
+    display: block;
+}
+
+.fixed-bottom {
+    position: fixed;
+    left: 20%;
+    bottom: 10px;
+    width: 60%;
+    text-align: center;
 }
 
 /* Style the sidenav links and the dropdown button */

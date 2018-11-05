@@ -19,7 +19,7 @@ class Message(models.Model):
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
 
     class Meta:
-        ordering = ['date_posted']
+        ordering = ['-date_posted']
 
     def __str__(self):
         text = self.text[:20] + '...' if len(self.text) > 20 else self.text

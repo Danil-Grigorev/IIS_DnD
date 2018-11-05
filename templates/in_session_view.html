@@ -4,22 +4,39 @@
 
 {% block main_view %}
     <div class="container-fluid">
-        {#        {% for message in messages %}#}
-        <div class="row"><span class="border"><div class="col col-md">
-                <blockquote class="blockquote text-right">
-                    <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
-                    <footer class="blockquote-footer">Someone famous in <cite
-                            title="Source Title">Source Title</cite></footer>
-                </blockquote>
-            </div></span></div>
-        <div class="row"><span class="border"><div class="col col-md">
-                <blockquote class="blockquote text-left">
-                    <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
-                    <footer class="blockquote-footer">Someone famous in <cite
-                            title="Source Title">Source Title</cite></footer>
-                </blockquote>
-            </div></span></div>
-        {#        {% endfor %}#}
+        <div class="scrollable">
+            {% for m in participator_chat %}
+                <p>{{ m }}</p>
+                <div class="row"><span class="border"><div class="col-sm">
+                    {% if viewer == m.author %}
+                        <blockquote class="blockquote text-right"
+                    {% else %}
+                        <blockquote class="blockquote text-left">
+                    {% endif %}
+                    {% if m.type == "Comment" %}
+                        <p class="text-muted">
+                        {% elif m.type == "Task" %}
+                        <p class="text-primary">
+                        {% elif m.type == "Action" %}
+                        <p class="text-success">
+                        {% else %}
+                            </p>
+                    {% endif %}
+                    {{ m.text }}
+                        <footer>{{ m.date_posted }} - <cite
+                                title="Source Title">{{ m.author }}</cite></footer>
+                    </blockquote>
+                </div></span></div>
+                {#            <div class="row"><span class="border"><div class="col col-md">#}
+                {#                <blockquote class="blockquote text-left">#}
+                {#                    <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>#}
+                {#                    <footer class="blockquote-footer">Someone famous in <cite#}
+                {#                            title="Source Title">Source Title</cite></footer>#}
+                {#                </blockquote>#}
+                {#            </div></span></div>#}
+            {% endfor %}
+        </div>
+        <div class="fixed-bottom">
         <form method="post">
             {% csrf_token %}
             <div class="form">
@@ -34,12 +51,13 @@
                     <div class="col col-md-2">
                         <div class="form-group required">{{ form.type }}</div>
                     </div>
-                    <div class="form-group small">
+                    <div class="col-md-4">
                         <input class="btn btn-success" type="submit" value="Write">
-                        <input class="btn btn-danger pull-right" type="reset" value="Clean">
+                        <input class="btn btn-danger " type="reset" value="Clean">
                     </div>
                 </div>
             </div>
         </form>
+        </div>
     </div>
 {% endblock %}

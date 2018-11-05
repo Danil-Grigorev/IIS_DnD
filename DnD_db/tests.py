@@ -14,8 +14,8 @@ def has_free_player(user):
 
 
 def get_free_players(profile):
-    p_list = Player.objects.filter(user=profile)
-    session_leaders = Session.objects.filter(author_id__in=p_list.values_list('id')).values_list('id')
+    p_list = Player.objects.filter(user=profile).exclude(session_part__in=Session.objects.all())
+    session_leaders = Session.objects.values_list('author_id')
     return p_list.exclude(id__in=session_leaders)  # Exclude session leaders
 
 

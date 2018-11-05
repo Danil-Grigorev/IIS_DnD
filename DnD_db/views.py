@@ -79,8 +79,9 @@ def session_view(request, sess_id):
     else:
         form = CreateMessage(request.user.profile, sess, request.POST)
     context = {
-        'messages': Message.objects.filter(session=sess),
+        'participator_chat': Message.objects.filter(session=sess),
         'form': form,
+        'viewer': Player.objects.filter(user=request.user.profile).values_list('nickname'),
     }
     return render(request, 'in_session_view.html', context)
 
@@ -117,7 +118,7 @@ def details_session(request, id):
     except ObjectDoesNotExist:
         participated_player = None
 
-    is_author = sess.leader.user == request.user.profile
+    is_author = sess.author.user == request.user.profile
 
     context = {
         'participator': participated_player,
