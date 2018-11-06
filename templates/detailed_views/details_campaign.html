@@ -1,12 +1,38 @@
 {% extends 'base_nav.html' %}
 
-{% block content %}
-    <h3>Campaign details</h3>
-    <p>Name: {{ obj_details.name }}</p>
-    <p>Info: {{ obj_details.info }}</p>
-    <p>Adventures: {{ obj_details.adventures }}</p>
+{% block title %}Campaign - detail{% endblock %}
 
-    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
-    <a href="{% url 'delete_campaign' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
-    <a href="{% url 'edit_campaign' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
+{% block content %}
+    <div class="container-fluid jumbotron">
+        <p>Campaign details</p>
+        <table class="table table-striped">
+            <thead>
+            <th>Info</th>
+            <th>Content</th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Name:</td>
+                <td>{{ obj_details.name }}</td>
+            </tr>
+            <tr>
+                <td>Info:</td>
+                <td>{{ obj_details.info }}</td>
+            </tr>
+            <tr>
+                <td>Adventures:</td>
+                <td>{{ obj_details.adventures }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col col-md-1"><a href="{% url 'delete_campaign' obj_details.id %}" role="button"
+                                         class="btn btn-danger">Remove</a></div>
+            <div class="col col-md-1"><a href="{% url 'edit_campaign' obj_details.id %}" role="button"
+                                         class="btn btn-warning">Edit</a></div>
+            <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
+                                             value="Return"></div>
+        </div>
+    </div>
 {% endblock %}

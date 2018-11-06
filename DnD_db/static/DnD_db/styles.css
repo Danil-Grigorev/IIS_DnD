@@ -36,6 +36,15 @@ body {
     text-align: center;
 }
 
+p {
+    margin: 15px 15px 15px 40px;
+}
+
+a {
+    min-width: 100px;
+}
+
+
 /* Style the sidenav links and the dropdown button */
 .sidenav a, .dropdown-btn {
     padding: 6px 8px 6px 16px;

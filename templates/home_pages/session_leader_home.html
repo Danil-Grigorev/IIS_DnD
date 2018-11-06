@@ -5,23 +5,60 @@
 {% block main_view %}
     <div class="container-fluid">
         {% if not has_player %}
-            <p>You have no free players. Switch role to author to create one?</p>
-            <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
-
+            <div class="jumbotron">
+                <div class="row">
+                    <div class="col col-sm-6">
+                        <p>You have no free players. Switch role to author to create one?</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-sm-2">
+                        <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
+                    </div>
+                </div>
+            </div>
         {% elif not campaigns %}
-            <p>There is no campaign created yet. Switch role to author to create one?</p>
-            <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
-        {% else %}
-
+            <div class="jumbotron">
+                <div class="col col-sm-6">
+                    <p class="border bg-info">There is no campaign created yet. Switch role to author to create one?</p>
+                </div>
+                <div class="col col-sm-2">
+                    <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
+                </div>
+            </div>
         {% endif %}
+
         {% if leaded_sessions %}
-            <h5>Leaded sessions:</h5>
+            <div class="jumbotron">
+            <div class="row">
+                <div class="col">
+                    <p>Leaded sessions:</p>
+                </div>
+            </div>
         {% endif %}
         {% for sess in leaded_sessions %}
-            <a href="{{ sess.get_absolute_url }}">{{ sess }}</a>
+            <div class="row">
+                <div class="col col-sm-3">
+                    <div>{{ sess }}</div>
+                </div>
+                <div class="col col-sm-2">
+                    <a href="{{ sess.get_absolute_url }}" role="button" class="btn btn-primary">Details</a>
+                </div>
+                <div class="col col-sm-2">
+                    <a href="{{ sess.get_participator_url }}" role="button" class="btn btn-success">Open</a>
+                </div>
+            </div>
         {% endfor %}
+        {% if leaded_sessions %}
+            </div>
+        {% endif %}
+    </div>
         {% if has_player and campaigns %}
-            <a href="{% url 'new_session' %}">Start new session</a>
+            <div class="row">
+                <div class="col">
+                    <p><a href="{% url 'new_session' %}">Start new session</a></p>
+                </div>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

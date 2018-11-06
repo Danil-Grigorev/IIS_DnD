@@ -1,15 +1,52 @@
 {% extends 'base_nav.html' %}
 
-{% block content %}
-    <h3>Character details</h3>
-    <p>Name: {{ obj_details.name }}</p>
-    <p>Race: {{ obj_details.race }}</p>
-    <p>Speciality: {{ obj_details.speciality }}</p>
-    <p>Level: {{ obj_details.level }}</p>
-    <p>Owner: {{ obj_details.owner }}</p>
-    <p>Death: {{ obj_details.death }}</p>
+{% block title %}Character - detail{% endblock %}
 
-    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
-    <a href="{% url 'delete_character' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
-    <a href="{% url 'edit_character' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
+{% block content %}
+    <div class="jumbotron container-fluid">
+    <h3>Character details</h3>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Info</th>
+                <th>Content</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Name:</td>
+                <td>{{ obj_details.name }}</td>
+            </tr>
+            <tr>
+                <td>Race:</td>
+                <td>{{ obj_details.race }}</td>
+            </tr>
+            <tr>
+                <td>Speciality:</td>
+                <td>{{ obj_details.speciality }}</td>
+            </tr>
+            <tr>
+                <td>Level:</td>
+                <td>{{ obj_details.level }}</td>
+            </tr>
+            <tr>
+                <td>Owner:</td>
+                <td>{{ obj_details.owner }}</td>
+            </tr>
+            <tr>
+                <td>Death:</td>
+                <td>{{ obj_details.death }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col col-md-1"><a href="{% url 'delete_character' obj_details.id %}" role="button"
+                                         class="btn btn-danger">Remove</a></div>
+            <div class="col col-md-1"><a href="{% url 'edit_character' obj_details.id %}" role="button"
+                                         class="btn btn-warning">Edit</a></div>
+            <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
+                                             value="Return"></div>
+        </div>
+    </div>
 {% endblock %}

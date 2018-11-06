@@ -1,22 +1,60 @@
 {% extends 'base_nav.html' %}
 
-{% block content %}
-    <h3>Session details</h3>
-    <p>Title: {{ obj_details.title }}</p>
-    <p>Creation_date: {{ obj_details.creation_date }}</p>
-    <p>Leader: {{ obj_details.author }}</p>
-    <p>Campaign: {{ obj_details.campaign }}</p>
+{% block title %}Session - detail{% endblock %}
 
-    <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+{% block content %}
+    <div class="jumbotron container-fluid">
+        <p>Session details</p>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Info</th>
+                <th>Content</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Title</td>
+                <td>{{ obj_details.title }}</td>
+            </tr>
+            <tr>
+                <td>Creation_date</td>
+                <td>{{ obj_details.creation_date }}</td>
+            </tr>
+            <tr>
+                <td>Leader</td>
+                <td>{{ obj_details.author }}</td>
+            </tr>
+            <tr>
+                <td>Campaign</td>
+                <td>{{ obj_details.campaign }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="row">
     {% if user.profile.role == "Session leader" and is_creator %}
-        <a href="{% url 'delete_session' obj_details.id %}" role="button" class="btn btn-danger">Remove</a>
-        <a href="{% url 'edit_session' obj_details.id %}" role="button" class="btn btn-warning">Edit</a>
+        <div class="col col-md-1"><a href="{% url 'delete_session' obj_details.id %}" role="button"
+                                     class="btn btn-danger">Remove</a></div>
+        <div class="col col-md-1"><a href="{% url 'edit_session' obj_details.id %}" role="button"
+                                     class="btn btn-warning">Edit</a></div>
+        <div class="col col-md-1"><a href="{{ obj_details.get_participator_url }}" role="button"
+                                     class="btn btn-md btn-success">Open</a></div>
     {% elif user.profile.role == "Player" %}
         {% if participator %}
-            <a href="{{ obj_details.get_participator_url }}" role="button" class="btn btn-success">Open</a>
-            <a href="{% url 'leave_session' obj_details.id %}" role="button" class="btn btn-danger">Leave</a>
+            <div class="col col-md-1"><a href="{{ obj_details.get_participator_url }}" role="button"
+                                         class="btn btn-success">Open</a></div>
+            <div class="col col-md-1"><a href="{% url 'leave_session' obj_details.id %}" role="button"
+                                         class="btn btn-danger">Leave</a></div>
         {% else %}
-            <a href="{% url 'take_session_part' obj_details.id %}" role="button" class="btn btn-success">Join</a>
+            <div class="col col-md-1"><a href="{% url 'take_session_part' obj_details.id %}" role="button"
+                                         class="btn btn-success">Join</a></div>
         {% endif %}
     {% endif %}
+            <div class="col col-md-1">
+                <input class="btn btn-confirm" type="button" onclick="return_back()" value="Return">
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
