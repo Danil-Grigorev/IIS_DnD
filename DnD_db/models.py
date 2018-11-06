@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, \
+    MaxValueValidator, validate_slug, MinLengthValidator, MaxLengthValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -15,7 +17,7 @@ class Message(models.Model):
     text = models.TextField()
     type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=AC)
     date_posted = models.DateTimeField(default=now)
-    author = models.ForeignKey('Player', on_delete=models.PROTECT, blank=False, null=True)
+    author = models.ForeignKey('Player', on_delete=models.SET_NULL, blank=False, null=True)
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
 
     class Meta:
@@ -52,7 +54,12 @@ def save_profile(sender, instance, **kwargs):
 
 class Player(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
-    nickname = models.CharField(max_length=100, blank=False, default='new player', unique=True)
+    nickname = models.CharField(max_length=30, blank=False, default='new_player', unique=True,
+                                validators=[
+                                    MinLengthValidator(4),
+                                    MaxLengthValidator(30),
+                                    validate_slug
+                                ])
     session_part = models.ForeignKey('Session', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
@@ -63,10 +70,14 @@ class Player(models.Model):
 
 
 class Session(models.Model):
-    title = models.CharField(max_length=100, blank=False, default='Title for session', unique=True)
+    title = models.CharField(max_length=60, blank=False, default='Title for session', unique=True,
+                             validators=[
+                                 MinLengthValidator(4),
+                                 MaxLengthValidator(60)
+                             ])
     creation_date = models.DateTimeField(default=now)
     author = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
-    campaign = models.ForeignKey('Campaign', on_delete=models.SET_NULL, blank=False, null=True)
+    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):
         return '{}'.format(self.title)
@@ -129,12 +140,21 @@ class Character(models.Model):
         (SI, SI),
     )
 
-    name = models.CharField(max_length=100, unique=True, default='New character')
+    name = models.CharField(max_length=30, unique=True, default='New_character',
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(30),
+                                validate_slug
+                            ])
     race = models.CharField(max_length=6, choices=RACES, default=HM)
     speciality = models.CharField(max_length=9, choices=SPECS, default=WA)
-    level = models.IntegerField(default=1)
+    level = models.IntegerField(default=1,
+                                validators=[
+                                    MinValueValidator(1),
+                                    MaxValueValidator(99)
+                                ])
     author = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
-    death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
+    death = models.OneToOneField('CharacterDeath', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -144,7 +164,11 @@ class Character(models.Model):
 
 
 class Map(models.Model):
-    name = models.CharField(max_length=100, default='New map', unique=True)
+    name = models.CharField(max_length=30, default='New_map', unique=True,
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(30)
+                            ])
     description = models.TextField(default='Some description')
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
@@ -174,7 +198,11 @@ class Enemy(models.Model):
         (ST, ST),
         (CR, CR),
     )
-    name = models.CharField(max_length=100, unique=True, blank=False, default='New enemy')
+    name = models.CharField(max_length=30, unique=True, blank=False, default='New_enemy',
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(30),
+                            ])
     type = models.CharField(max_length=8, blank=False, choices=ENEMIES, default=DE)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
@@ -186,10 +214,22 @@ class Enemy(models.Model):
 
 
 class Adventure(models.Model):
-    name = models.CharField(max_length=100, unique=True, default='New adventure')
-    difficulty = models.IntegerField(default=0)
-    purpose = models.TextField(default='New purpose')
-    location = models.CharField(max_length=100, default='Some location')
+    name = models.CharField(max_length=60, unique=True, default='New_adventure',
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(60)
+                            ])
+    difficulty = models.IntegerField(default=1,
+                                     validators=[
+                                         MaxValueValidator(10),
+                                         MinValueValidator(1),
+                                     ])
+    purpose = models.TextField(default='New_purpose')
+    location = models.CharField(max_length=30, default='Some location',
+                                validators=[
+                                    MinLengthValidator(4),
+                                    MaxLengthValidator(30),
+                                ])
     map = models.ManyToManyField(Map, blank=False)
     enemies = models.ManyToManyField(Enemy, blank=True)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
@@ -202,7 +242,11 @@ class Adventure(models.Model):
 
 
 class Campaign(models.Model):
-    name = models.CharField(max_length=100, unique=True, default='New campaign')
+    name = models.CharField(max_length=30, unique=True, default='New_campaign',
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(30),
+                            ])
     info = models.TextField(default='Campaign info', blank=False)
     adventures = models.ManyToManyField(Adventure, blank=False)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
@@ -236,9 +280,13 @@ class Inventory(models.Model):
         (TO, TO),
         (OT, OT),
     )
-    name = models.CharField(max_length=100, default='New item')
+    name = models.CharField(max_length=30, default='New_item',
+                            validators=[
+                                MinLengthValidator(4),
+                                MaxLengthValidator(30),
+                            ])
     type = models.CharField(max_length=6, blank=False, choices=TYPES, default=WP)
-    owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.PROTECT)
+    owner = models.ForeignKey(Character, blank=True, null=True, on_delete=models.SET_NULL)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
 
     def __str__(self):

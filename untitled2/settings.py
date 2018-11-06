@@ -78,10 +78,13 @@ WSGI_APPLICATION = 'untitled2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'mysql.connector.django',
         'NAME': 'iis',
         'USER': 'xgrigo02',
         'PASSWORD': 'verova1nik',
+        'OPTIONS': {
+            'autocommit': True,
+        },
     }
 }
 
