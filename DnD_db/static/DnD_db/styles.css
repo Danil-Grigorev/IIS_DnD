@@ -48,21 +48,16 @@ a {
 /* Style the sidenav links and the dropdown button */
 .sidenav a, .dropdown-btn {
     padding: 6px 8px 6px 16px;
-    text-decoration: none;
     color: black;
     display: block;
     border: none;
-    background: none;
     width: 100%;
-    text-align: left;
+    text-align: center;
     cursor: pointer;
     outline: none;
 }
 
-/* On mouse-over */
-.sidenav a:hover, .dropdown-btn:hover {
-    color: #928f90;
-}
+
 
 /* Main content */
 .main {
@@ -70,15 +65,15 @@ a {
     padding: 0px 10px;
 }
 
-/*.active {*/
-/*background-color: darkgray;*/
-/*color: white;*/
-/*}*/
+.active {
+    background-color: darkgray;
+    color: white;
+}
 
 /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
 .dropdown-container {
     display: none;
-    background-color: lavender;
+    background-color: white;
     padding-left: 8px;
 }
 

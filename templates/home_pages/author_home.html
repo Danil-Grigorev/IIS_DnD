@@ -11,7 +11,7 @@
             {% for player in players %}
                 <a href="{{ player.get_absolute_url }}">{{ player }}</a>
             {% endfor %}
-            <a href="{% url 'new_player' %}">Create new player</a>
+            <a class="btn btn-success" role="button" href="{% url 'new_player' %}">Create new player</a>
         </div>
 
         {% if players %}
@@ -22,7 +22,7 @@
                 {% for character in characters %}
                     <a href="{{ character.get_absolute_url }}">{{ character }}</a>
                 {% endfor %}
-                <a href="{% url 'new_character' %}">Create new character</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_character' %}">Create new character</a>
             </div>
 
             <button class="dropdown-btn">Adventures
@@ -32,7 +32,7 @@
                 {% for adventure in adventures %}
                     <a href="{{ adventure.get_absolute_url }}">{{ adventure }}</a>
                 {% endfor %}
-                <a href="{% url 'new_adventure' %}">Create new adventure</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_adventure' %}">Create new adventure</a>
             </div>
 
             <button class="dropdown-btn">Campaigns
@@ -42,7 +42,7 @@
                 {% for campaign in campaigns %}
                     <a href="{{ campaign.get_absolute_url }}">{{ campaign }}</a>
                 {% endfor %}
-                <a href="{% url 'new_campaign' %}">Create new campaign</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_campaign' %}">Create new campaign</a>
             </div>
 
             <button class="dropdown-btn">Maps
@@ -52,7 +52,7 @@
                 {% for map in maps %}
                     <a href="{{ map.get_absolute_url }}">{{ map }}</a>
                 {% endfor %}
-                <a href="{% url 'new_map' %}">Create map</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_map' %}">Create map</a>
             </div>
 
             <button class="dropdown-btn">Enemies
@@ -62,7 +62,7 @@
                 {% for enemy in enemies %}
                     <a href="{{ enemy.get_absolute_url }}">{{ enemy }}</a>
                 {% endfor %}
-                <a href="{% url 'new_enemy' %}">Create enemy</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_enemy' %}">Create enemy</a>
             </div>
 
             <button class="dropdown-btn">Items
@@ -72,7 +72,7 @@
                 {% for item in items %}
                     <a href="{{ item.get_absolute_url }}">{{ item }}</a>
                 {% endfor %}
-                <a href="{% url 'new_inventory' %}">Create item</a>
+                <a class="btn btn-success" role="button" href="{% url 'new_inventory' %}">Create item</a>
             </div>
         {% endif %}
     </div>

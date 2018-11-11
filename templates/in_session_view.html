@@ -7,7 +7,7 @@
         <div class="scrollable">
             {% for m in participator_chat %}
                 <div class="row"><span class="border"><div class="col-sm">
-                    {% if m.author == viewer %}
+                    {% if m.author.author == viewer %}
                         <blockquote class="blockquote text-right">
                     {% else %}
                         <blockquote class="blockquote text-left">
@@ -27,13 +27,6 @@
                                 title="Source Title">{{ m.author }}</cite></footer>
                     </blockquote>
                 </div></span></div>
-                {#            <div class="row"><span class="border"><div class="col col-md">#}
-                {#                <blockquote class="blockquote text-left">#}
-                {#                    <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>#}
-                {#                    <footer class="blockquote-footer">Someone famous in <cite#}
-                {#                            title="Source Title">Source Title</cite></footer>#}
-                {#                </blockquote>#}
-                {#            </div></span></div>#}
             {% endfor %}
         </div>
         <div class="fixed-bottom">
@@ -60,4 +53,26 @@
         </form>
         </div>
     </div>
+{% endblock %}
+
+{% block right_view %}
+    <div class="row">
+        <h5>Leader</h5>
+        <a href="{{ session_leader.character.get_absolute_url }}">{{ session_leader.character }}</a>
+    </div>
+    <table class="row table table-striped">
+        <thead>
+        <tr>
+            <th>Players</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in players %}
+            <tr>
+                <td><a href="{{ p.character.get_absolute_url }}">{{ p.character }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
 {% endblock %}

@@ -17,7 +17,7 @@ class Message(models.Model):
     text = models.TextField()
     type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=AC)
     date_posted = models.DateTimeField(default=now)
-    author = models.ForeignKey('Player', on_delete=models.SET_NULL, blank=False, null=True)
+    author = models.ForeignKey('Character', on_delete=models.SET_NULL, blank=False, null=True)
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
 
     class Meta:
@@ -35,7 +35,6 @@ class Profile(models.Model):
     roles = ((PL, PL), (AU, AU), (PJ, PJ))
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
     role = models.CharField(max_length=14, blank=False, null=False, choices=roles, default=PL)
-    invitations = models.ManyToManyField('Session', through='Player', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -52,8 +51,19 @@ def save_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
+class Invitation(models.Model):
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, null=True, blank=False)
+    player = models.ForeignKey('Player', on_delete=models.CASCADE, null=True, blank=False)
+
+    def __str__(self):
+        return '{} to {}'.format(self.player, self.session)
+
+    class Meta:
+        unique_together = (('session', 'player'),)
+
+
 class Player(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, blank=False)
     nickname = models.CharField(max_length=30, blank=False, default='new_player', unique=True,
                                 validators=[
                                     MinLengthValidator(4),
@@ -67,6 +77,9 @@ class Player(models.Model):
 
     def get_absolute_url(self):
         return '/player_details/{}'.format(self.id)
+
+    def get_kill_url(self):
+        return '/player_details/{}/kill'.format(self.id)
 
 
 class Session(models.Model):
@@ -151,13 +164,13 @@ class Character(models.Model):
     level = models.IntegerField(default=1,
                                 validators=[
                                     MinValueValidator(1),
-                                    MaxValueValidator(99)
+                                    MaxValueValidator(100)
                                 ])
-    author = models.ForeignKey(Player, on_delete=models.CASCADE, blank=False, null=True)
-    death = models.OneToOneField('CharacterDeath', on_delete=models.SET_NULL, blank=True, null=True)
+    author = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
+    death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return '{}: {}'.format(self.author.nickname, self.name)
 
     def get_absolute_url(self):
         return reverse('detailed_character', kwargs={'id': self.id})
@@ -258,10 +271,10 @@ class Campaign(models.Model):
         return reverse('detailed_campaign', kwargs={'id': self.id})
 
 
-# TODO: reference to character
 class CharacterDeath(models.Model):
+    place = models.TextField(default="Character death place", blank=True)
     time = models.DateTimeField(default=now)
-    place = models.ForeignKey('Map', on_delete=models.CASCADE, blank=False, null=True)
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
 
 
 class Inventory(models.Model):

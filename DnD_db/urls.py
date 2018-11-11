@@ -11,9 +11,12 @@ urlpatterns = [
     path('change_role/author', views.role_change, {'role': 'Author'}, name='role_author'),
     path('change_role/session_leader', views.role_change, {'role': 'Session leader'}, name='role_session_leader'),
 
-    path('take_session_part/<int:sess_id>/', views.participate_in_session, name='take_session_part'),
+    path('take_session_part/<int:sess_id>/<int:player_id>/', views.participate_in_session, name='take_session_part'),
+    path('send_invitation/<int:sess_id>/', views.send_invitation, name='send_invitation'),
     path('leave_session/<int:sess_id>/', views.leave_session, name='leave_session'),
     path('view_session/<int:sess_id>/', views.session_view, name='view_session'),
+    # path('view_session/<int:sess_id>/kill/<int:ch_id>/', views.kill_character, name='kill_character'),
+    path('view_session/<int:sess_id>/details/<int:ch_id>/', views.details_character, name='details_sess_character'),
 
     path('new_session/', views.new_session, name='new_session'),
     path('new_character/', views.new_character, name='new_character'),
@@ -23,6 +26,7 @@ urlpatterns = [
     path('new_adventure/', views.new_adventure, name='new_adventure'),
     path('new_campaign/', views.new_campaign, name='new_campaign'),
     path('new_inventory/', views.new_inventory, name='new_inventory'),
+    path('session_details/<int:sess_id>/send_invitation', views.send_invitation, name='send_invitation'),
 
     path('map_details/<int:id>/', views.details_map, name='detailed_map'),
     path('player_details/<int:id>/', views.details_player, name='detailed_player'),

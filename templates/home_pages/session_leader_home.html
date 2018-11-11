@@ -18,9 +18,9 @@
                 </div>
             </div>
         {% elif not campaigns %}
-            <div class="jumbotron">
+            <div class="row jumbotron">
                 <div class="col col-sm-6">
-                    <p class="border bg-info">There is no campaign created yet. Switch role to author to create one?</p>
+                    <p>There is no campaign created yet. Switch role to author to create one?</p>
                 </div>
                 <div class="col col-sm-2">
                     <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>

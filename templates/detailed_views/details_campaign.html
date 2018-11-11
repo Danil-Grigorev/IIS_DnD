@@ -27,10 +27,12 @@
         </table>
 
         <div class="row">
+            {% if user.profile.role == "Author" %}
             <div class="col col-md-1"><a href="{% url 'delete_campaign' obj_details.id %}" role="button"
                                          class="btn btn-danger">Remove</a></div>
             <div class="col col-md-1"><a href="{% url 'edit_campaign' obj_details.id %}" role="button"
                                          class="btn btn-warning">Edit</a></div>
+            {% endif %}
             <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
                                              value="Return"></div>
         </div>

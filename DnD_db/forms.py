@@ -1,26 +1,31 @@
 from django import forms
 
 from .models import *
-from .tests import get_free_players
 
 
-class TakePartS(forms.Form):
-    class Meta:
-        fields = ('session', 'player')
-
-    def __init__(self, profile, sess_id, *args, **kwargs):
+class CreateInvitation(forms.ModelForm):
+    def __init__(self, sess_id, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sess_id = sess_id
-        self.fields['player'] = forms.ModelChoiceField(
-            queryset=get_free_players(profile),
-            widget=forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose session"})
-        )
+        self.sess = Session.objects.get(id=sess_id)
+        joined = Player.objects.filter(session_part=self.sess).values_list('user')
+        players = Player.objects.exclude(user=self.sess.author.user)
+        players = players.exclude(user__in=joined)
+        players = players.exclude(session_part_id=sess_id)
+        self.fields['player'].queryset = players
 
-    def save(self):
+    class Meta:
+        model = Invitation
+        widgets = {
+            'player': forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose player to invite"})
+        }
+        fields = ['player']
+
+    def save(self, commit=True):
         data = self.cleaned_data
-        player = data['player']
-        player.session_part = Session.objects.get(id=self.sess_id)
-        player.save()
+        s = super().save(commit=False)
+        s.session = self.sess
+        s.player = data['player']
+        super().save(commit)
 
 
 class CreateMessage(forms.ModelForm):
@@ -39,8 +44,12 @@ class CreateMessage(forms.ModelForm):
 
     def save(self, commit=True):
         s = super().save(commit=False)
-        player = Player.objects.filter(user=self.profile).filter(session_part=self.sess)[0]
-        s.author = player
+        if self.sess.author.user == self.profile:
+            character = Character.objects.get(author=self.sess.author)
+        else:
+            character = Character.objects.get(
+                author=Player.objects.filter(user=self.profile).filter(session_part=self.sess)[0])
+        s.author = character
         s.session = self.sess
         super().save(commit)
 
@@ -49,7 +58,7 @@ class CreateSession(forms.ModelForm):
 
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['author'].queryset = Player.objects.filter(user=profile)
+        self.fields['author'].queryset = Player.objects.exclude(id__in=Session.objects.values_list('author_id'))
 
     class Meta:
         model = Session
@@ -63,11 +72,35 @@ class CreateSession(forms.ModelForm):
         labels = {'author': 'leader'}
 
 
+class KillCharacter(forms.ModelForm):
+
+    def __init__(self, sess, char, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.sess = sess
+        self.char = char
+
+    class Meta:
+        model = CharacterDeath
+        widgets = {
+            'place': forms.TextInput(attrs={
+                'class': 'form-control', 'placeholder': 'Where and how character was killed'
+            })
+        }
+        fields = ['place']
+
+    def save(self, commit=True):
+        s = super().save(commit=False)
+        s.session = self.sess
+        s = super().save(commit)
+        self.char.death = s
+        self.char.save()
+
+
 class CreateCharacter(forms.ModelForm):
 
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['author'].queryset = Player.objects.filter(user=profile)
+        self.fields['author'].queryset = Player.objects.filter(user=profile).filter(character=None)
 
     class Meta:
         model = Character

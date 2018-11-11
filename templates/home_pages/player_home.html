@@ -38,14 +38,13 @@
                 {% for invitation in invited_sessions %}
                     <div class="row">
                         <div class="col col-sm-4">
-                            <a href="{{ invitation.get_absolute_url }}">{{ invitation }}</a>
+                            <a href="{{ invitation.session.get_absolute_url }}">{{ invitation.session }}</a>
                         </div>
-                        {% if has_player %}
-                            <div class="col col-sm-2">
-                                <a href="{% url 'take_session_part' invitation.id %}" class="btn btn-success"
-                                   role="button">Join</a>
-                            </div>
-                        {% endif %}
+                        <div class="col col-sm-2">
+                            <a href="{% url 'take_session_part' invitation.session.id invitation.player.id %}"
+                               class="btn btn-success"
+                               role="button">Join</a>
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}

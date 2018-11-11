@@ -33,7 +33,11 @@ def home(request):
         pl_part_sess = Player.objects.filter(user=request.user.profile).values_list('session_part')
         part_sessions_l = Session.objects.filter(id__in=pl_part_sess)
         context['participated_sessions'] = part_sessions_l
-        context['invited_sessions'] = Session.objects.exclude(id__in=part_sessions_l.values_list('id'))
+        if context['has_player']:
+            context['invited_sessions'] = Invitation.objects.filter(
+                player=Player.objects.get(user=request.user.profile))
+        else:
+            context['invited_sessions'] = None
 
         return render(request, 'home_pages/player_home.html', context)
     else:
@@ -49,24 +53,36 @@ def role_change(request, role):
 
 
 @login_required(login_url='/login/')
-def participate_in_session(request, sess_id):
+# @is_author
+def send_invitation(request, sess_id):
     if request.method == 'POST':
-        form = TakePartS(request.user.profile, sess_id, request.POST)
+        form = CreateInvitation(sess_id, request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Successfully joined session.')
-            return redirect(Session.objects.get(id=form.sess_id).get_participator_url())
+            messages.success(request, 'Invitation is sent.')
+            return redirect(Session.objects.get(id=sess_id).get_absolute_url())
         else:
-            messages.error(request, "Can't take part in session, invalid form detected")
+            messages.error(request, "Can't send invitation, error detected.")
     else:
-        form = TakePartS(request.user.profile, sess_id)
+        form = CreateInvitation(sess_id)
     context = {
-        'title': 'Session participation',
+        'title': 'Send invitation',
         'form': form,
-        'name': 'Choose session and player',
-        'submit_name': 'Start'
+        'name': 'Send invitation',
+        'submit_name': 'Send'
     }
     return render(request, 'forms/form_base.html', context)
+
+
+@login_required(login_url='/login/')
+def participate_in_session(request, sess_id, player_id):
+    sess = Session.objects.get(id=sess_id)
+    player = Player.objects.get(id=player_id)
+    player.session_part = sess
+    player.save()
+    inv = Invitation.objects.get(player=player, session=sess)
+    inv.delete()
+    return redirect(sess.get_participator_url())
 
 
 @login_required(login_url='/login/')
@@ -76,12 +92,27 @@ def session_view(request, sess_id):
         form = CreateMessage(request.user.profile, sess, request.POST)
         if form.is_valid():
             form.save()
+            form = CreateMessage(request.user.profile, sess)
+            return redirect('view_session', sess_id)
     else:
-        form = CreateMessage(request.user.profile, sess, request.POST)
+        form = CreateMessage(request.user.profile, sess)
+
+    author = Player.objects.filter(user=request.user.profile).filter(id=sess.author_id)
+    if author.exists():
+        viewer = author[0]
+    else:
+        viewer = Player.objects.filter(user=request.user.profile).filter(session_part=sess)
+        if viewer.exists():
+            viewer = viewer[0]
+        else:
+            return HttpResponseNotFound('<h1>You are not a participator of this session</h1')
+
     context = {
         'participator_chat': Message.objects.filter(session=sess),
         'form': form,
-        'viewer': Player.objects.filter(user=request.user.profile).filter(session_part=sess)[0],
+        'viewer': viewer,
+        'players': Player.objects.filter(session_part=sess),
+        'session_leader': sess.author,
     }
     return render(request, 'in_session_view.html', context)
 
@@ -118,12 +149,20 @@ def details_session(request, id):
     except ObjectDoesNotExist:
         participated_player = None
 
-    is_author = sess.author.user == request.user.profile
-
+    is_creator = sess.author.user == request.user.profile
+    if not is_creator:
+        invitation = Invitation.objects.filter(session=sess, player=participated_player)
+        if not invitation.exists():
+            invitation = None
+        else:
+            invitation = invitation[0]
+    else:
+        invitation = None
     context = {
         'participator': participated_player,
-        'is_creator': is_author,
+        'is_creator': is_creator,
         'obj_details': sess,
+        'invitation': invitation
     }
     return render(request, 'detailed_views/details_session.html', context)
 
@@ -158,11 +197,33 @@ def delete(request, id, model):
     return render(request, 'confirm_action.html', {'obj_details': obj, 'operation': 'delete'})
 
 
+# @login_required(login_url='/home/')
+# def kill_character(request, sess_id, ch_id):
+#     sess = get_object_or_404(Session, id=sess_id)
+#     char = get_object_or_404(Character, id=ch_id)
+#     if request.method == 'POST':
+#         form = KillCharacter(sess, char, request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.info(request, '{} was killed'.format(char.name))
+#     else:
+#         form = KillCharacter(sess, char)
+#
+#     context = {
+#         'title': 'kill character',
+#         'form': form,
+#         'name': 'Kill character',
+#         'submit_name': 'Kill'
+#     }
+#     return render(request, 'forms/form_base.html', context)
+
+
 @login_required(login_url='/home/')
 def leave_session(request, sess_id):
     session = Session.objects.get(id=sess_id)
     if request.method == 'POST':
         player = Player.objects.filter(user=request.user.profile).get(session_part=session)
+        can_edit_object(request.user.profile, player.user)
         player.session_part = None
         player.save()
         return redirect('home')
@@ -173,6 +234,7 @@ def leave_session(request, sess_id):
 @login_required(login_url='/home/')
 def edit_player(request, id):
     obj = get_object_or_404(Player, id=id)
+    can_edit_object(request.user.profile, obj.user)
     if request.method == 'POST':
         form = CreatePlayer(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -196,6 +258,7 @@ def edit_player(request, id):
 @login_required(login_url='/home/')
 def edit_session(request, id):
     obj = get_object_or_404(Session, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateSession(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -219,6 +282,7 @@ def edit_session(request, id):
 @login_required(login_url='/home/')
 def edit_character(request, id):
     obj = get_object_or_404(Character, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateCharacter(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -242,6 +306,7 @@ def edit_character(request, id):
 @login_required(login_url='/home/')
 def edit_enemy(request, id):
     obj = get_object_or_404(Enemy, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateEnemy(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -265,6 +330,7 @@ def edit_enemy(request, id):
 @login_required(login_url='/home/')
 def edit_adventure(request, id):
     obj = get_object_or_404(Adventure, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateAdventure(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -288,6 +354,7 @@ def edit_adventure(request, id):
 @login_required(login_url='/home/')
 def edit_campaign(request, id):
     obj = get_object_or_404(Campaign, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateCampaign(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -311,6 +378,7 @@ def edit_campaign(request, id):
 @login_required(login_url='/home/')
 def edit_inventory(request, id):
     obj = get_object_or_404(Inventory, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateInventory(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -334,6 +402,7 @@ def edit_inventory(request, id):
 @login_required(login_url='/home/')
 def edit_map(request, id):
     obj = get_object_or_404(Map, id=id)
+    can_edit_object(request.user.profile, obj.author.user)
     if request.method == 'POST':
         form = CreateMap(request.user.profile, request.POST, instance=obj)
         if form.is_valid():

@@ -40,6 +40,8 @@
                                      class="btn btn-warning">Edit</a></div>
         <div class="col col-md-1"><a href="{{ obj_details.get_participator_url }}" role="button"
                                      class="btn btn-md btn-success">Open</a></div>
+        <div class="col col-md-2"><a href="{% url 'send_invitation' obj_details.id %}" role="button"
+                                     class="btn btn-md btn-success">Send invitation</a></div>
     {% elif user.profile.role == "Player" %}
         {% if participator %}
             <div class="col col-md-1"><a href="{{ obj_details.get_participator_url }}" role="button"
@@ -47,7 +49,8 @@
             <div class="col col-md-1"><a href="{% url 'leave_session' obj_details.id %}" role="button"
                                          class="btn btn-danger">Leave</a></div>
         {% else %}
-            <div class="col col-md-1"><a href="{% url 'take_session_part' obj_details.id %}" role="button"
+            <div class="col col-md-1"><a href="{% url 'take_session_part' obj_details.id  invitation.player.id %}"
+                                         role="button"
                                          class="btn btn-success">Join</a></div>
         {% endif %}
     {% endif %}

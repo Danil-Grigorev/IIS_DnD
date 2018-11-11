@@ -4,10 +4,30 @@
 {% block title %}Sign up{% endblock %}
 
 {% block content %}
-    <h2>Sign up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign up</button>
-    </form>
+    <div class="container">
+        <form method="post" action="{% url 'sign_up' %}">
+            {% csrf_token %}
+            <div class="form">
+                <h2>Sign up</h2>
+                <div class="jumbotron">
+                    {% for error in form.non_field_errors %}
+                        <div class="form-group small text-danger has-errors">{{ error }}</div>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <div class="form-group has-errors text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                        <div class="form-group required">
+                            {{ field.label_tag }}{{ field }}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group small">
+                        <input class="btn btn-primary" type="submit" value="Sign up">
+                        <a href="{% url 'login' %}" type="button" class="btn btn-primary pull-right">Login</a>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+    </div>
 {% endblock %}
