@@ -57,8 +57,10 @@
 
 {% block right_view %}
     <div class="row">
-        <h5>Leader</h5>
-        <a href="{{ session_leader.character.get_absolute_url }}">{{ session_leader.character }}</a>
+        <h5>Session - <a href="{{ session.get_absolute_url }}">{{ session }}</a></h5>
+    </div>
+    <div class="row">
+        <h5>Leader - <a href="{{ session_leader.character.get_absolute_url }}">{{ session_leader.character }}</a></h5>
     </div>
     <table class="row table table-striped">
         <thead>

@@ -23,11 +23,11 @@
             </tr>
             <tr>
                 <td>Leader</td>
-                <td>{{ obj_details.author }}</td>
+                <td><a href="{{ obj_details.author.get_absolute_url }}">{{ obj_details.author }}</a></td>
             </tr>
             <tr>
                 <td>Campaign</td>
-                <td>{{ obj_details.campaign }}</td>
+                <td><a href="{{ obj_details.campaign.get_absolute_url }}">{{ obj_details.campaign }}</a></td>
             </tr>
             </tbody>
         </table>
@@ -48,10 +48,6 @@
                                          class="btn btn-success">Open</a></div>
             <div class="col col-md-1"><a href="{% url 'leave_session' obj_details.id %}" role="button"
                                          class="btn btn-danger">Leave</a></div>
-        {% else %}
-            <div class="col col-md-1"><a href="{% url 'take_session_part' obj_details.id  invitation.player.id %}"
-                                         role="button"
-                                         class="btn btn-success">Join</a></div>
         {% endif %}
     {% endif %}
             <div class="col col-md-1">

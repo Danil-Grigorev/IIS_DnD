@@ -31,31 +31,68 @@
             </tr>
             <tr>
                 <td>Owner:</td>
-                <td>{{ obj_details.author }}</td>
+                <td><a href="{{ obj_details.author.get_absolute_url }}">{{ obj_details.author }}</a></td>
             </tr>
             <tr>
                 <td>Death:</td>
-                <td>{{ obj_details.death }}</td>
+                {% if obj_details.death %}
+                    <td>{{ obj_details.death }}</td>
+                {% else %}
+                    <td>Still alive</td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>Items:</td>
+                <td>
+                    {% for i in items %}
+                        <a href="{{ i.get_absolute_url }}">{{ i }}</a>,
+                    {% endfor %}
+                </td>
             </tr>
             </tbody>
         </table>
 
         <div class="row">
-            {% if user.profile.role == "Author" %}
-            <div class="col col-md-1"><a href="{% url 'delete_character' obj_details.id %}" role="button"
-                                         class="btn btn-danger">Remove</a></div>
-            <div class="col col-md-1"><a href="{% url 'edit_character' obj_details.id %}" role="button"
-                                         class="btn btn-warning">Edit</a></div>
-            {% elif user.profile.role == "Session leader" %}
-                <div class="col col-md-1"><a href="#" role="button"
-                                             class="btn btn-warning">Kill</a></div>
-                <div class="col col-md-1"><a href="#" role="button"
-                                             class="btn btn-warning">Level up</a></div>
-                <div class="col col-md-1"><a href="#" role="button"
-                                             class="btn btn-warning">Give item</a></div>
+            {% if user.profile.role == "Author" and can_edit %}
+                <div class="col col-md-1"><a href="{% url 'delete_character' obj_details.id %}" role="button"
+                                             class="btn btn-danger">Remove</a></div>
+                <div class="col col-md-1"><a href="{% url 'edit_character' obj_details.id %}" role="button"
+                                             class="btn btn-warning">Edit</a></div>
+                <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
+                                                 value="Return"></div>
+            {% elif user.profile.role == "Session leader" and char_session_leader %}
+                {% if obj_details.death %}
+                    <div class="col col-md-1">
+                        <a href="{% url 'revive_character' obj_details.author.session_part_id obj_details.id %}"
+                           role="button"
+                           class="btn btn-success">Revive</a>
+                    </div>
+                {% else %}
+                    <div class="col col-md-1">
+                        <a href="{% url 'kill_character' obj_details.author.session_part_id obj_details.id %}"
+                           role="button"
+                           class="btn btn-danger">Kill</a>
+                    </div>
+                {% endif %}
+                <div class="col col-md-1">
+                    <a href="{% url 'level_up' obj_details.author.session_part_id obj_details.id %}" role="button"
+                       class="btn btn-success">Level up</a></div>
+                <div class="col col-md-1">
+                    <a href="{% url 'level_down' obj_details.author.session_part_id obj_details.id %}" role="button"
+                       class="btn btn-danger">Level down</a></div>
+                <div class="col col-md-1">
+                    <a href="{% url 'give_item' obj_details.author.session_part_id obj_details.id %}" role="button"
+                       class="btn btn-success">Give item</a></div>
+                <div class="col col-md-1">
+                    <a href="{% url 'take_item' obj_details.author.session_part_id obj_details.id %}" role="button"
+                       class="btn btn-warning">Take item</a></div>
+                <div class="col col-md-1">
+                    <a href="{{ obj_details.author.session_part.get_participator_url }}" role="button"
+                       class="btn btn-info">Return to session</a></div>
+            {% else %}
+                <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
+                                                 value="Return"></div>
             {% endif %}
-            <div class="col col-md-1"><input class="btn btn-confirm" type="button" onclick="return_back()"
-                                             value="Return"></div>
         </div>
     </div>
 {% endblock %}

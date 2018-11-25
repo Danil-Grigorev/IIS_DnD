@@ -11,11 +11,9 @@ def home(request):
     if request.user.is_anonymous:
         return render(request, 'home_pages/player_home.html', {})
 
-    context = {
-        'has_player': has_free_player(request.user),
-        'players': Player.objects.filter(user=request.user.profile),
-    }
+    context = {}
     if request.user.profile.role == "Author":
+        context['players'] = Player.objects.filter(user=request.user.profile)
         context['campaigns'] = Campaign.objects.filter(author=request.user.profile)
         context['characters'] = Character.objects.filter(author__user=request.user.profile)
         context['adventures'] = Adventure.objects.filter(author=request.user.profile)
@@ -27,17 +25,16 @@ def home(request):
     elif request.user.profile.role == "Session leader":
         leaders = Player.objects.filter(user=request.user.profile)
         context['leaded_sessions'] = Session.objects.filter(author__in=leaders)
+        context['players'] = get_any_free_pl(request.user.profile)
         context['campaigns'] = Campaign.objects.exists()
         return render(request, 'home_pages/session_leader_home.html', context)
     elif request.user.profile.role == "Player":
         pl_part_sess = Player.objects.filter(user=request.user.profile).values_list('session_part')
         part_sessions_l = Session.objects.filter(id__in=pl_part_sess)
         context['participated_sessions'] = part_sessions_l
-        if context['has_player']:
-            context['invited_sessions'] = Invitation.objects.filter(
-                player=Player.objects.get(user=request.user.profile))
-        else:
-            context['invited_sessions'] = None
+        context['players'] = Player.objects.filter(user=request.user.profile)
+        context['invited_sessions'] = Invitation.objects.filter(
+            player__in=Player.objects.filter(user=request.user.profile))
 
         return render(request, 'home_pages/player_home.html', context)
     else:
@@ -53,8 +50,9 @@ def role_change(request, role):
 
 
 @login_required(login_url='/login/')
-# @is_author
 def send_invitation(request, sess_id):
+    if not can_edit_object(request.user.profile, Session.objects.get(id=sess_id).author.user):
+        return HttpResponseNotFound('<h1>You are not an author of this session</h1')
     if request.method == 'POST':
         form = CreateInvitation(sess_id, request.POST)
         if form.is_valid():
@@ -80,7 +78,9 @@ def participate_in_session(request, sess_id, player_id):
     player = Player.objects.get(id=player_id)
     player.session_part = sess
     player.save()
-    inv = Invitation.objects.get(player=player, session=sess)
+    inv = Invitation.objects.filter(
+        player__in=Player.objects.filter(user=request.user.profile),
+        session=sess)
     inv.delete()
     return redirect(sess.get_participator_url())
 
@@ -113,6 +113,7 @@ def session_view(request, sess_id):
         'viewer': viewer,
         'players': Player.objects.filter(session_part=sess),
         'session_leader': sess.author,
+        'session': sess,
     }
     return render(request, 'in_session_view.html', context)
 
@@ -120,25 +121,44 @@ def session_view(request, sess_id):
 @login_required(login_url='/login')
 def details_campaign(request, id):
     obj = get_object_or_404(Campaign, id=id)
-    return render(request, 'detailed_views/details_campaign.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.author.user.profile),
+    }
+    return render(request, 'detailed_views/details_campaign.html', context=context)
 
 
 @login_required(login_url='/login')
 def details_map(request, id):
     obj = get_object_or_404(Map, id=id)
-    return render(request, 'detailed_views/details_map.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.author.user.profile),
+    }
+    return render(request, 'detailed_views/details_map.html', context=context)
 
 
 @login_required(login_url='/login')
 def details_player(request, id):
     obj = get_object_or_404(Player, id=id)
-    return render(request, 'detailed_views/details_player.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.user),
+    }
+    return render(request, 'detailed_views/details_player.html', context=context)
 
 
 @login_required(login_url='/login')
 def details_character(request, id):
-    obj = get_object_or_404(Character, id=id)
-    return render(request, 'detailed_views/details_character.html', {'obj_details': obj})
+    char = get_object_or_404(Character, id=id)
+    char_session_leader = char.author.session_part and char.author.session_part.author.user == request.user.profile
+    context = {
+        'obj_details': char,
+        'can_edit': can_edit_object(request.user.profile, char.author.user),
+        'char_session_leader': char_session_leader,
+        'items': Inventory.objects.filter(owner_id=char.id),
+    }
+    return render(request, 'detailed_views/details_character.html', context=context)
 
 
 @login_required(login_url='/login')
@@ -150,19 +170,11 @@ def details_session(request, id):
         participated_player = None
 
     is_creator = sess.author.user == request.user.profile
-    if not is_creator:
-        invitation = Invitation.objects.filter(session=sess, player=participated_player)
-        if not invitation.exists():
-            invitation = None
-        else:
-            invitation = invitation[0]
-    else:
-        invitation = None
+
     context = {
         'participator': participated_player,
         'is_creator': is_creator,
         'obj_details': sess,
-        'invitation': invitation
     }
     return render(request, 'detailed_views/details_session.html', context)
 
@@ -170,19 +182,31 @@ def details_session(request, id):
 @login_required(login_url='/login')
 def details_enemy(request, id):
     obj = get_object_or_404(Enemy, id=id)
-    return render(request, 'detailed_views/details_enemy.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.author.user.profile),
+    }
+    return render(request, 'detailed_views/details_enemy.html', context=context)
 
 
 @login_required(login_url='/login')
 def details_adventure(request, id):
     obj = get_object_or_404(Adventure, id=id)
-    return render(request, 'detailed_views/details_adventure.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.author.user.profile),
+    }
+    return render(request, 'detailed_views/details_adventure.html', context=context)
 
 
 @login_required(login_url='/login')
 def details_inventory(request, id):
     obj = get_object_or_404(Inventory, id=id)
-    return render(request, 'detailed_views/details_inventory.html', {'obj_details': obj})
+    context = {
+        'obj_details': obj,
+        'can_edit': can_edit_object(request.user.profile, obj.author.user.profile),
+    }
+    return render(request, 'detailed_views/details_inventory.html', context=context)
 
 
 @login_required(login_url='/home/')
@@ -197,25 +221,37 @@ def delete(request, id, model):
     return render(request, 'confirm_action.html', {'obj_details': obj, 'operation': 'delete'})
 
 
-# @login_required(login_url='/home/')
-# def kill_character(request, sess_id, ch_id):
-#     sess = get_object_or_404(Session, id=sess_id)
-#     char = get_object_or_404(Character, id=ch_id)
-#     if request.method == 'POST':
-#         form = KillCharacter(sess, char, request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.info(request, '{} was killed'.format(char.name))
-#     else:
-#         form = KillCharacter(sess, char)
-#
-#     context = {
-#         'title': 'kill character',
-#         'form': form,
-#         'name': 'Kill character',
-#         'submit_name': 'Kill'
-#     }
-#     return render(request, 'forms/form_base.html', context)
+@login_required(login_url='/home/')
+def kill_character(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    form = KillCharacter(sess, char, request.POST)
+    if form.is_valid():
+        form.save()
+
+    return redirect(char.get_absolute_url())
+
+
+@login_required(login_url='/home/')
+def revive_character(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or not CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    death = char.death
+    char.death = None
+    char.save()
+    death.delete()
+
+    return redirect(char.get_absolute_url())
 
 
 @login_required(login_url='/home/')
@@ -223,7 +259,8 @@ def leave_session(request, sess_id):
     session = Session.objects.get(id=sess_id)
     if request.method == 'POST':
         player = Player.objects.filter(user=request.user.profile).get(session_part=session)
-        can_edit_object(request.user.profile, player.user)
+        if not can_edit_object(request.user.profile, player.user):
+            return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
         player.session_part = None
         player.save()
         return redirect('home')
@@ -234,7 +271,8 @@ def leave_session(request, sess_id):
 @login_required(login_url='/home/')
 def edit_player(request, id):
     obj = get_object_or_404(Player, id=id)
-    can_edit_object(request.user.profile, obj.user)
+    if not can_edit_object(request.user.profile, obj.user):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreatePlayer(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -258,7 +296,8 @@ def edit_player(request, id):
 @login_required(login_url='/home/')
 def edit_session(request, id):
     obj = get_object_or_404(Session, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateSession(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -282,7 +321,8 @@ def edit_session(request, id):
 @login_required(login_url='/home/')
 def edit_character(request, id):
     obj = get_object_or_404(Character, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateCharacter(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -306,7 +346,8 @@ def edit_character(request, id):
 @login_required(login_url='/home/')
 def edit_enemy(request, id):
     obj = get_object_or_404(Enemy, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user.profile):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateEnemy(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -330,7 +371,8 @@ def edit_enemy(request, id):
 @login_required(login_url='/home/')
 def edit_adventure(request, id):
     obj = get_object_or_404(Adventure, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user.profile):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateAdventure(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -354,7 +396,8 @@ def edit_adventure(request, id):
 @login_required(login_url='/home/')
 def edit_campaign(request, id):
     obj = get_object_or_404(Campaign, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user.profile):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateCampaign(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -378,7 +421,8 @@ def edit_campaign(request, id):
 @login_required(login_url='/home/')
 def edit_inventory(request, id):
     obj = get_object_or_404(Inventory, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user.profile):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateInventory(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -402,7 +446,8 @@ def edit_inventory(request, id):
 @login_required(login_url='/home/')
 def edit_map(request, id):
     obj = get_object_or_404(Map, id=id)
-    can_edit_object(request.user.profile, obj.author.user)
+    if not can_edit_object(request.user.profile, obj.author.user.profile):
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
     if request.method == 'POST':
         form = CreateMap(request.user.profile, request.POST, instance=obj)
         if form.is_valid():
@@ -512,7 +557,7 @@ def new_inventory(request):
 
 
 @login_required(login_url='/login/')
-def new_session(request):
+def new_session(request, player_id=None):
     if request.method == 'POST':
         form = CreateSession(request.user.profile, request.POST)
         if form.is_valid():
@@ -523,6 +568,9 @@ def new_session(request):
             messages.error(request, "Can't create session, invalid form detected")
     else:
         form = CreateSession(request.user.profile)
+        if player_id:
+            form.fields['author'].initial = Player.objects.get(id=player_id)
+
     context = {
         'title': 'Create session',
         'form': form,
@@ -534,7 +582,7 @@ def new_session(request):
 
 # @user_passes_test(has_free_player, login_url='/home/')
 @login_required(login_url='/login/')
-def new_character(request):
+def new_character(request, player_id=None):
     if request.method == 'POST':
         form = CreateCharacter(request.user.profile, request.POST)
         if form.is_valid():
@@ -545,6 +593,8 @@ def new_character(request):
             messages.error(request, "Can't create character, invalid form detected")
     else:
         form = CreateCharacter(request.user.profile)
+        if player_id:
+            form.fields['author'].initial = Player.objects.get(id=player_id)
 
     context = {
         'title': 'Create character',
@@ -599,3 +649,89 @@ def new_map(request):
         'submit_name': 'Add map'
     }
     return render(request, 'forms/form_base.html', context)
+
+
+def level_up(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or not CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    if char.level < char.MAX_LEVEL:
+        char.level += 1
+        char.save()
+    return redirect(char.get_absolute_url())
+
+
+def level_down(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or not CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    if char.level > char.MIN_LEVEL:
+        char.level -= 1
+        char.save()
+    return redirect(char.get_absolute_url())
+
+
+def give_item(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or not CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    if request.method == 'POST':
+        form = SelectItem(char, True, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Item was given to {}'.format(char.name))
+            return redirect(char.get_absolute_url())
+        else:
+            messages.error(request, "Can't create map, invalid form detected")
+    else:
+        form = SelectItem(char, True)
+
+    context = {
+        'title': 'Give item',
+        'form': form,
+        'name': 'Give item',
+        'submit_name': 'Give',
+        'next': char.get_absolute_url()
+    }
+    return render(request, 'forms/form_base.html', context=context)
+
+
+def take_item(request, sess_id, char_id):
+    sess = get_object_or_404(Session, id=sess_id)
+    char = get_object_or_404(Character, id=char_id)
+    if sess.author.user.user != request.user \
+            or not CharacterDeath.objects.filter(character=char).exists() \
+            or char.author.session_part != sess:
+        return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
+
+    if request.method == 'POST':
+        form = SelectItem(char, False, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Item was taken from {}'.format(char.name))
+            return redirect(char.get_absolute_url())
+        else:
+            messages.error(request, "Can't create map, invalid form detected")
+    else:
+        form = SelectItem(char, False)
+
+    context = {
+        'title': 'Take item',
+        'form': form,
+        'name': 'Take item',
+        'submit_name': 'Take',
+        'next': char.get_absolute_url()
+    }
+    return render(request, 'forms/form_base.html', context=context)

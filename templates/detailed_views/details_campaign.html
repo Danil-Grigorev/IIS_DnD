@@ -21,13 +21,17 @@
             </tr>
             <tr>
                 <td>Adventures:</td>
-                <td>{{ obj_details.adventures }}</td>
+                <td>
+                    {% for a in obj_details.adventures.all %}
+                        <a href="{{ a.get_absolute_url }}">{{ a }}</a>
+                    {% endfor %}
+                </td>
             </tr>
             </tbody>
         </table>
 
         <div class="row">
-            {% if user.profile.role == "Author" %}
+            {% if user.profile.role == "Author" and can_edit %}
             <div class="col col-md-1"><a href="{% url 'delete_campaign' obj_details.id %}" role="button"
                                          class="btn btn-danger">Remove</a></div>
             <div class="col col-md-1"><a href="{% url 'edit_campaign' obj_details.id %}" role="button"

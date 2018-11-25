@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpResponseNotFound, Http404
+from django.http import HttpResponseNotFound
 from django.shortcuts import get_object_or_404
 
 from .models import *
@@ -14,6 +14,10 @@ def has_free_player(user):
 
 
 def get_free_players(profile):
+    return get_any_free_pl(profile).exclude(character=None)
+
+
+def get_any_free_pl(profile):
     p_list = Player.objects.filter(user=profile).exclude(session_part__in=Session.objects.all())
     session_leaders = Session.objects.values_list('author_id')
     return p_list.exclude(id__in=session_leaders)  # Exclude session leaders
@@ -40,9 +44,8 @@ def can_delete_object(func):
     return wrapper
 
 
-def can_edit_object(profile, author_profile):
-    if profile != author_profile:
-        raise Http404("<h1>You have no permission to do that</h1>")
+def can_edit_object(profile, user_profile):
+    return profile == user_profile
 
 
 def is_author(func):

@@ -2,51 +2,58 @@
 
 {% block title %}Player home{% endblock %}
 
-{% block sidenav %}
-    <div class="sidenav">
-        {% if has_player %}
-            <button class="dropdown-btn">Joined sessions
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-container">
-                {% for session in sessions %}
-                    <a href="{{ session.get_absolute_url }}">{{ session }}</a>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-{% endblock %}
-
-
 {% block main_view %}
     <div class="container-fluid">
         {% if players %}
             {% if participated_sessions %}
-                <div class="row">
+                <div class="jumbotron row">
+                    <p>Participated:</p>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Session title</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
                     {% for part in participated_sessions %}
-                        <div class="col col-sm-6">
-                            <a href="{{ part.get_absolute_url }}">{{ part }}</a>
-                        </div>
-                        <div class="col col-sm-2">
-                            <a href="{{ part.get_participator_url }}" class="btn btn-success" role="button">Show</a>
-                        </div>
+                        <tr>
+                            <td>
+                                <a href="{{ part.get_absolute_url }}">{{ part }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ part.get_participator_url }}" class="btn btn-success" role="button">Show</a>
+                            </td>
+                        </tr>
                     {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             {% endif %}
             {% if invited_sessions %}
-                <h5>Invitations:</h5>
+                <div class="jumbotron row">
+                    <p>Invitations:</p>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Session title</th>
+                            <th>Player nickname</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
                 {% for invitation in invited_sessions %}
-                    <div class="row">
-                        <div class="col col-sm-4">
-                            <a href="{{ invitation.session.get_absolute_url }}">{{ invitation.session }}</a>
-                        </div>
-                        <div class="col col-sm-2">
-                            <a href="{% url 'take_session_part' invitation.session.id invitation.player.id %}"
+                    <tr>
+                        <td><a href="{{ invitation.session.get_absolute_url }}">{{ invitation.session }}</a></td>
+                        <td><a href="{{ invitation.player.get_absolute_url }}">{{ invitation.player }}</a></td>
+                        <td><a href="{% url 'take_session_part' invitation.session_id invitation.player_id %}"
                                class="btn btn-success"
-                               role="button">Join</a>
-                        </div>
-                    </div>
+                               role="button">Join</a></td>
+                    </tr>
                 {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% else %}
                 {% if not participated_sessions %}
                     <h3>You are not invited in any session yet</h3>

@@ -80,22 +80,52 @@
 
 {% block main_view %}
     <div class="container-fluid">
-        {% if not enemies %}
+
+        {% if players %}
             <div class="row">
-                <div class="col col-sm-6">
-                    <p>You have not yet created any enemy.</p>
-                </div>
-                <div class="col col-sm-1">
-                    <a href="{% url 'new_enemy' %}" class="btn btn-success" role="button">Create enemy</a>
-                </div>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Player name</th>
+                        <th>Character</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in players %}
+                        <tr>
+                            <td class="col-md-4">{{ p }}</td>
+                            {% if p.character %}
+                                <td class="col-md-4"><a href="{{ p.character.get_absolute_url }}">{{ p.character }}</a>
+                                </td>
+                            {% else %}
+                                <td class="col-md-4">
+                                    <a href="{% url 'new_character_assigned' p.id %}" class="btn btn-success"
+                                       role="button">
+                                        Create and assign
+                                    </a>
+                                </td>
+                            {% endif %}
+                            <td><a href="{{ p.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         {% else %}
-
+            <div class="row">
+                <div class="col col-sm-8">
+                    <p>You have not yet created any player.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_player' %}" class="btn btn-success" role="button">Create player</a>
+                </div>
+            </div>
         {% endif %}
 
         {% if not maps %}
             <div class="row">
-                <div class="col col-sm-6">
+                <div class="col col-sm-8">
                     <p>You have not yet created any map.</p>
                 </div>
                 <div class="col col-sm-1">
@@ -103,12 +133,59 @@
                 </div>
             </div>
         {% else %}
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Map name</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for m in maps %}
+                        <tr>
+                            <td class="col-md-8">{{ m }}</td>
+                            <td><a href="{{ m.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
 
+        {% if not enemies %}
+            <div class="row">
+                <div class="col col-sm-8">
+                    <p>You have not yet created any enemy.</p>
+                </div>
+                <div class="col col-sm-1">
+                    <a href="{% url 'new_enemy' %}" class="btn btn-success" role="button">Create enemy</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Enemy name</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for e in enemies %}
+                        <tr>
+                            <td class="col-md-8">{{ e }}</td>
+                            <td><a href="{{ e.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
 
         {% if not adventures %}
             <div class="row">
-                <div class="col col-sm-6">
+                <div class="col col-sm-8">
                     <p>You have not yet created any adventure.</p>
                 </div>
                 <div class="col col-sm-1">
@@ -116,12 +193,29 @@
                 </div>
             </div>
         {% else %}
-
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Adventure name</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for a in adventures %}
+                        <tr>
+                            <td class="col-md-8">{{ a }}</td>
+                            <td><a href="{{ a.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
 
         {% if not campaigns %}
             <div class="row">
-                <div class="col col-sm-6">
+                <div class="col col-sm-8">
                     <p>You have not yet created any campaign.</p>
                 </div>
                 <div class="col col-sm-1">
@@ -129,7 +223,45 @@
                 </div>
             </div>
         {% else %}
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Campaign name</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in campaigns %}
+                        <tr>
+                            <td class="col-md-8">{{ c }}</td>
+                            <td><a href="{{ c.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
 
+        {% if items %}
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Item name</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in items %}
+                        <tr>
+                            <td class="col-md-8">{{ i }}</td>
+                            <td><a href="{{ i.get_absolute_url }}" class="btn btn-info" role="button">Info</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
 
     </div>

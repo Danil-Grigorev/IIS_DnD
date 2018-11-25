@@ -4,7 +4,36 @@
 
 {% block main_view %}
     <div class="container-fluid">
-        {% if not has_player %}
+
+        {% if leaded_sessions %}
+            <div class="row jumbotron">
+                <p>Leaded sessions</p>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Info</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for sess in leaded_sessions %}
+                        <tr>
+                            <td class="col-md-4">{{ sess }}</td>
+                            <td class="col-md-4">
+                                <a href="{{ sess.get_absolute_url }}" role="button" class="btn btn-primary">Details</a>
+                            </td>
+                            <td>
+                                <a href="{{ sess.get_participator_url }}" role="button" class="btn btn-success">Open</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        {% if not players %}
             <div class="jumbotron">
                 <div class="row">
                     <div class="col col-sm-6">
@@ -26,38 +55,37 @@
                     <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change role</a>
                 </div>
             </div>
-        {% endif %}
-
-        {% if leaded_sessions %}
-            <div class="jumbotron">
-            <div class="row">
-                <div class="col">
-                    <p>Leaded sessions:</p>
-                </div>
-            </div>
-        {% endif %}
-        {% for sess in leaded_sessions %}
-            <div class="row">
-                <div class="col col-sm-3">
-                    <div>{{ sess }}</div>
-                </div>
-                <div class="col col-sm-2">
-                    <a href="{{ sess.get_absolute_url }}" role="button" class="btn btn-primary">Details</a>
-                </div>
-                <div class="col col-sm-2">
-                    <a href="{{ sess.get_participator_url }}" role="button" class="btn btn-success">Open</a>
-                </div>
-            </div>
-        {% endfor %}
-        {% if leaded_sessions %}
-            </div>
-        {% endif %}
-    </div>
-        {% if has_player and campaigns %}
-            <div class="row">
-                <div class="col">
-                    <p><a href="{% url 'new_session' %}">Start new session</a></p>
-                </div>
+        {% else %}
+            <div class="row jumbotron">
+                <p>Start new session</p>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Player name</th>
+                        <th>Character</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in players %}
+                        <tr>
+                            <td class="col-md-4">{{ p }}</td>
+                            {% if p.character %}
+                                <td class="col-md-4"><a href="{{ p.character.get_absolute_url }}">{{ p.character }}</a>
+                                </td>
+                                <td><a href="{% url 'new_session_assigned' p.id %}" class="btn btn-info" role="button">Start
+                                    session</a></td>
+                            {% else %}
+                                <td class="col-md-4">
+                                    <a href="{% url 'role_author' %}" class="btn btn-success" role="button">Change
+                                        role</a>
+                                </td>
+                                <td>Create character first</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         {% endif %}
     </div>

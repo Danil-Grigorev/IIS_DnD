@@ -15,7 +15,7 @@ class Message(models.Model):
     TYPES = ((AC, AC), (CO, CO), (TA, TA))
 
     text = models.TextField()
-    type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=AC)
+    type = models.CharField(max_length=7, blank=False, null=False, choices=TYPES, default=CO)
     date_posted = models.DateTimeField(default=now)
     author = models.ForeignKey('Character', on_delete=models.SET_NULL, blank=False, null=True)
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
@@ -103,6 +103,9 @@ class Session(models.Model):
 
 
 class Character(models.Model):
+    MIN_LEVEL = 1
+    MAX_LEVEL = 100
+
     HB = 'Hobbit'
     KU = 'Kuduk'
     DW = 'Dwarf'
@@ -163,14 +166,14 @@ class Character(models.Model):
     speciality = models.CharField(max_length=9, choices=SPECS, default=WA)
     level = models.IntegerField(default=1,
                                 validators=[
-                                    MinValueValidator(1),
-                                    MaxValueValidator(100)
+                                    MinValueValidator(MIN_LEVEL),
+                                    MaxValueValidator(MAX_LEVEL)
                                 ])
     author = models.OneToOneField(Player, on_delete=models.CASCADE, blank=False, null=True)
     death = models.OneToOneField('CharacterDeath', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
-        return '{}: {}'.format(self.author.nickname, self.name)
+        return self.name
 
     def get_absolute_url(self):
         return reverse('detailed_character', kwargs={'id': self.id})
@@ -272,9 +275,11 @@ class Campaign(models.Model):
 
 
 class CharacterDeath(models.Model):
-    place = models.TextField(default="Character death place", blank=True)
     time = models.DateTimeField(default=now)
     session = models.ForeignKey('Session', on_delete=models.CASCADE, blank=False, null=True)
+
+    def __str__(self):
+        return self.time.__str__()
 
 
 class Inventory(models.Model):

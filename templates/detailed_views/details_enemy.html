@@ -29,7 +29,7 @@
         </table>
 
         <div class="row">
-            {% if user.profile.role == "Author" %}
+            {% if user.profile.role == "Author" and can_edit %}
             <div class="col col-md-1"><a href="{% url 'delete_enemy' obj_details.id %}" role="button"
                                          class="btn btn-danger">Remove</a></div>
             <div class="col col-md-1"><a href="{% url 'edit_enemy' obj_details.id %}" role="button"

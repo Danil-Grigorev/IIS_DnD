@@ -23,13 +23,17 @@
             </tr>
             <tr>
                 <td>Session_part</td>
-                <td>{{ obj_details.session_part }}</td>
+                {% if obj_details.session_part %}
+                    <td>{{ obj_details.session_part }}</td>
+                {% else %}
+                    <td>Unassigned yet</td>
+                {% endif %}
             </tr>
             </tbody>
         </table>
 
         <div class="row">
-            {% if user.profile.role == "Author" %}
+            {% if user.profile.role == "Author" and can_edit %}
             <div class="col col-md-1"><a href="{% url 'delete_player' obj_details.id %}" role="button"
                                          class="btn btn-danger">Remove</a></div>
             <div class="col col-md-1"><a href="{% url 'edit_player' obj_details.id %}" role="button"

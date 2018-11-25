@@ -1,5 +1,6 @@
 from django import forms
 
+from DnD_db.tests import get_free_players
 from .models import *
 
 
@@ -9,8 +10,10 @@ class CreateInvitation(forms.ModelForm):
         self.sess = Session.objects.get(id=sess_id)
         joined = Player.objects.filter(session_part=self.sess).values_list('user')
         players = Player.objects.exclude(user=self.sess.author.user)
+        players = players.exclude(character=None)
         players = players.exclude(user__in=joined)
         players = players.exclude(session_part_id=sess_id)
+        players = players.exclude(id__in=Invitation.objects.filter(session_id=sess_id).values_list('player'))
         self.fields['player'].queryset = players
 
     class Meta:
@@ -33,6 +36,8 @@ class CreateMessage(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.profile = profile
         self.sess = sess
+        if not Character.objects.filter(author__user=self.profile, death=None).exists():
+            self.fields['type'].choises = ((Message.CO, Message.CO),)
 
     class Meta:
         model = Message
@@ -47,10 +52,11 @@ class CreateMessage(forms.ModelForm):
         if self.sess.author.user == self.profile:
             character = Character.objects.get(author=self.sess.author)
         else:
-            character = Character.objects.get(
-                author=Player.objects.filter(user=self.profile).filter(session_part=self.sess)[0])
+            character = Character.objects.get(author__session_part=self.sess)
         s.author = character
         s.session = self.sess
+        if not Character.objects.filter(author__user=self.profile, death=None).exists():
+            s.type = Message.CO
         super().save(commit)
 
 
@@ -58,7 +64,7 @@ class CreateSession(forms.ModelForm):
 
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['author'].queryset = Player.objects.exclude(id__in=Session.objects.values_list('author_id'))
+        self.fields['author'].queryset = get_free_players(profile)
 
     class Meta:
         model = Session
@@ -81,12 +87,7 @@ class KillCharacter(forms.ModelForm):
 
     class Meta:
         model = CharacterDeath
-        widgets = {
-            'place': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Where and how character was killed'
-            })
-        }
-        fields = ['place']
+        fields = []
 
     def save(self, commit=True):
         s = super().save(commit=False)
@@ -238,3 +239,29 @@ class CreateInventory(forms.ModelForm):
         s.author = self.profile
         s.owner = None
         super().save()
+
+
+class SelectItem(forms.Form):
+    class Meta:
+        fields = ('item',)
+
+    def __init__(self, char, give=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.give = give
+        self.char = char
+        if self.give:
+            inv_queryset = Inventory.objects.filter(owner=None)
+        else:
+            inv_queryset = Inventory.objects.filter(owner=self.char)
+        self.fields['item'] = forms.ModelChoiceField(
+            queryset=inv_queryset,
+            widget=forms.Select(attrs={'class': 'form-control', 'placeholder': "Choose item"}),
+        )
+
+    def save(self):
+        item = self.cleaned_data['item']
+        if self.give:
+            item.owner = self.char
+        else:
+            item.owner = None
+        item.save()

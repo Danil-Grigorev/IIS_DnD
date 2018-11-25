@@ -22,14 +22,22 @@
                 <td>{{ obj_details.type }}</td>
             </tr>
             <tr>
+                <td>Author</td>
+                <td>{{ obj_details.author }}</td>
+            </tr>
+            <tr>
                 <td>Owner</td>
-                <td>{{ obj_details.owner }}</td>
+                {% if obj_details.owner %}
+                    <td><a href="{{ obj_details.owner.get_absolute_url }}">{{ obj_details.owner }}</a></td>
+                {% else %}
+                    <td>?</td>
+                {% endif %}
             </tr>
             </tbody>
         </table>
 
         <div class="row">
-            {% if user.profile.role == "Author" %}
+            {% if user.profile.role == "Author" and can_edit %}
             <div class="col col-md-1"><a href="{% url 'delete_inventory' obj_details.id %}" role="button"
                                          class="btn btn-danger">Remove</a></div>
             <div class="col col-md-1"><a href="{% url 'edit_inventory' obj_details.id %}" role="button"
