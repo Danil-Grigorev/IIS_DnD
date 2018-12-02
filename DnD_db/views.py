@@ -278,7 +278,7 @@ def edit_player(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -303,7 +303,7 @@ def edit_session(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -328,7 +328,7 @@ def edit_character(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -353,7 +353,7 @@ def edit_enemy(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -378,7 +378,7 @@ def edit_adventure(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -403,7 +403,7 @@ def edit_campaign(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -428,7 +428,7 @@ def edit_inventory(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -453,7 +453,7 @@ def edit_map(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "'{}' was updated successfully.".format(obj))
-            return redirect('home')
+            return redirect(obj.get_absolute_url())
         else:
             messages.error(request, "Can't update '{}', invalid form detected".format(obj))
     else:
@@ -651,11 +651,12 @@ def new_map(request):
     return render(request, 'forms/form_base.html', context)
 
 
+@login_required(login_url='/login/')
 def level_up(request, sess_id, char_id):
     sess = get_object_or_404(Session, id=sess_id)
     char = get_object_or_404(Character, id=char_id)
     if sess.author.user.user != request.user \
-            or not CharacterDeath.objects.filter(character=char).exists() \
+            or CharacterDeath.objects.filter(character=char).exists() \
             or char.author.session_part != sess:
         return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
 
@@ -665,11 +666,12 @@ def level_up(request, sess_id, char_id):
     return redirect(char.get_absolute_url())
 
 
+@login_required(login_url='/login/')
 def level_down(request, sess_id, char_id):
     sess = get_object_or_404(Session, id=sess_id)
     char = get_object_or_404(Character, id=char_id)
     if sess.author.user.user != request.user \
-            or not CharacterDeath.objects.filter(character=char).exists() \
+            or CharacterDeath.objects.filter(character=char).exists() \
             or char.author.session_part != sess:
         return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
 
@@ -679,11 +681,12 @@ def level_down(request, sess_id, char_id):
     return redirect(char.get_absolute_url())
 
 
+@login_required(login_url='/login/')
 def give_item(request, sess_id, char_id):
     sess = get_object_or_404(Session, id=sess_id)
     char = get_object_or_404(Character, id=char_id)
     if sess.author.user.user != request.user \
-            or not CharacterDeath.objects.filter(character=char).exists() \
+            or CharacterDeath.objects.filter(character=char).exists() \
             or char.author.session_part != sess:
         return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
 
@@ -708,11 +711,12 @@ def give_item(request, sess_id, char_id):
     return render(request, 'forms/form_base.html', context=context)
 
 
+@login_required(login_url='/login/')
 def take_item(request, sess_id, char_id):
     sess = get_object_or_404(Session, id=sess_id)
     char = get_object_or_404(Character, id=char_id)
     if sess.author.user.user != request.user \
-            or not CharacterDeath.objects.filter(character=char).exists() \
+            or CharacterDeath.objects.filter(character=char).exists() \
             or char.author.session_part != sess:
         return HttpResponseNotFound('<h1>You have no permission to do that</h1>')
 

@@ -20,12 +20,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'wigzn+y=xcx*8ld528(-hm5zsv&-j5pwb)kp%7k1re+kx5w9$5'
+# SECRET_KEY = 'wigzn+y=xcx*8ld528(-hm5zsv&-j5pwb)kp%7k1re+kx5w9$5'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'wigzn+y=xcx*8ld528(-hm5zsv&-j5pwb)kp%7k1re+kx5w9$5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '*'
+]
 
 
 # Application definition
@@ -38,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'login.apps.LoginConfig',
-    'DnD_db.apps.DndDbConfig'
+    'DnD_db.apps.DndDbConfig',
 ]
 
 MIDDLEWARE = [
@@ -126,6 +129,7 @@ USE_TZ = True
 # https://docs.djangoproject.cxgrigo02om/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "DnD_db/static/")
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/home/'

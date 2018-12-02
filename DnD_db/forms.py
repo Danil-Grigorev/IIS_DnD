@@ -52,7 +52,7 @@ class CreateMessage(forms.ModelForm):
         if self.sess.author.user == self.profile:
             character = Character.objects.get(author=self.sess.author)
         else:
-            character = Character.objects.get(author__session_part=self.sess)
+            character = Character.objects.get(author__user=self.profile, author__session_part=self.sess)
         s.author = character
         s.session = self.sess
         if not Character.objects.filter(author__user=self.profile, death=None).exists():
